@@ -1,13 +1,13 @@
-<h1 align="center" style="border-bottom: none;">macpro-base-template</h1>
-<h3 align="center">A serverless monorepo accelerator tailored for use at Centers for Medicare & Medicaid Services (CMS).</h3>
+<h1 align="center" style="border-bottom: none;">macpro-appian-connector</h1>
+<h3 align="center">A Kafka Connector to stream data changes from Appian to Bigmac.</h3>
 <p align="center">
-  <a href="https://enterprise-cmcs.github.io/macpro-base-template/">
+  <a href="https://github.com/Enterprise-CMCS/macpro-appian-connector">
     <img alt="Docs" src="https://img.shields.io/badge/Docs-Pages-blue.svg">
   </a>
-  <a href="https://cmsgov.slack.com/archives/C04D6HXJ3GA">
+  <a href="https://cmsgov.slack.com/archives/C04K1444K89">
     <img alt="Slack" src="https://img.shields.io/badge/Slack-channel-purple.svg">
   </a>
-  <a href="https://codeclimate.com/github/Enterprise-CMCS/macpro-base-template/maintainability">
+  <a href="https://codeclimate.com/github/Enterprise-CMCS/macpro-appian-connector/maintainability">
     <img src="https://api.codeclimate.com/v1/badges/f7cce65e43346ac8e2c2/maintainability" />
   </a>
   <a href="https://dependabot.com/">
@@ -23,13 +23,12 @@
 
 ---
 
-### Please visit our [docs site](https://enterprise-cmcs.github.io/macpro-base-template/) for complete documentation.
+### Please visit our [docs site](https://enterprise-cmcs.github.io/macpro-appian-connector/) for complete documentation.
 
 ---
 
 ## Overview
-
-The macpro-base-template project (oftened referenced in the context of this repository as just 'base' or 'base-template') is a serverless monorepo accelerator. The actual application is fairly 'hello world', but the repository support and configuration is full featured. This is by design, to allow for simpler project creation from the template. Full CI/CD support with GitHub Actions, automated security scanning, docs site in GitHub Pages, PR/Issue templates, infrastructure and application deployment workflows, etc. is all included.
+A Kafka Connector to stream data changes from Appian to Bigmac.
 
 ![Architecture Diagram](docs/assets/diagram.svg)
 
