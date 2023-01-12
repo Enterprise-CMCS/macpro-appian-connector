@@ -13,20 +13,24 @@
 title: Base Template
 description: A baseline serverless monorepo project that helps get your project up and running faster.
 # baseurl: "/just-the-docs" # the subpath of your site, e.g. /blog
-url: "https://just-the-docs.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://enterprise-cmcs.github.io/macpro-appian-connector/" # the base hostname & protocol for your site, e.g. http://example.com
 
-contact_email: bpaige@gswell.com
+contact_email: jdinh@gswell.com
 
 team:
   members: # This list automatically populates the Team Introduction page.  Add/Edit as appropriate.
-    - role: Product Owner
-      description: Responsible for project scope, direction, and delivery.
-      name: Berry Davenport
-      email: bdavenport@gswell.com
     - role: Tech Lead
       description: Leads tooling, tech, and arch discussions and decisions.
-      name: Mike Dial
-      email: mdial@gswell.com
+      name: James Dinh
+      email: jdinh@gswell.com
+    - role: Software Engineer
+      description: Leads tooling, tech, and arch discussions and decisions.
+      name: JP Hechter
+      email: jhechter@fearless.tech
+    - role: Software Engineer
+      description: Leads tooling, tech, and arch discussions and decisions.
+      name: Gavin St. Ours
+      email: gst-ours@fearless.tech
   core_hours: 10:00am - 3:00pm ET
 
 meetings:
@@ -41,7 +45,7 @@ repo:
   url: https://github.com/Enterprise-CMCS/macpro-appian-connector
 
 slack: 
-  channel_url: https://cmsgov.slack.com/archives/C04D6HXJ3GA
+  channel_url: https://cmsgov.slack.com/archives/C04K1444K89
 
 remote_theme: just-the-docs/just-the-docs
 permalink: pretty
@@ -79,7 +83,7 @@ nav_external_links:
   - title: GitHub
     url: https://github.com/Enterprise-CMCS/macpro-appian-connector
   - title: Slack
-    url: https://cmsgov.slack.com/archives/C04D6HXJ3GA
+    url: https://cmsgov.slack.com/archives/C04K1444K89
 
 # Footer content
 # appears at the bottom of every page's main content
