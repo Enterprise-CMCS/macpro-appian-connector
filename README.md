@@ -1,7 +1,7 @@
 <h1 align="center" style="border-bottom: none;">macpro-appian-connector</h1>
 <h3 align="center">A Kafka Connector to stream data changes from Appian to Bigmac.</h3>
 <p align="center">
-  <a href="https://github.com/Enterprise-CMCS/macpro-appian-connector">
+  <a href="https://enterprise-cmcs.github.io/macpro-appian-connector/">
     <img alt="Docs" src="https://img.shields.io/badge/Docs-Pages-blue.svg">
   </a>
   <a href="https://cmsgov.slack.com/archives/C04K1444K89">
