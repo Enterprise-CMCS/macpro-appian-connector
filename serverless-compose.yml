@@ -7,3 +7,6 @@ services:
     path: src/services/topics
   connector:
     path: src/services/connector
+    params:
+      ecsFailureTopicArn: ${alerts.ECSFailureTopicArn}
+    dependsOn: topics
