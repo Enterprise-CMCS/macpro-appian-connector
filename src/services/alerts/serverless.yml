@@ -33,7 +33,7 @@ resources:
         TopicName: Alerts-${self:service}-${sls:stage}
         KmsMasterKeyId: !Ref KmsKeyForSns
 
-  KmsKeyForSns:
+    KmsKeyForSns:
       Type: AWS::KMS::Key
       Properties:
         EnableKeyRotation: "true"
