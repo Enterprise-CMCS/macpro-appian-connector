@@ -43,7 +43,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: "**/node_modules"
-          key: ${{ github.workflow}}-${{ github.job }}${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          key: v16-${{ github.workflow}}-${{ github.job }}${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
