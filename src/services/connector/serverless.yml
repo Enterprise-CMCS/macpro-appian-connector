@@ -321,7 +321,7 @@ resources:
                 "account": "$.account"
                 "stoppedReason": "$.detail.stoppedReason"
               InputTemplate: |
-                "An Connector ECS Task Failure Event has occured for mmdl-connectors. Account: <account> Cluster ARN: <clusterArn> Status: <status> Reason: <stoppedReason>"
+                "An Connector ECS Task Failure Event has occured for appian-connectors. Account: <account> Cluster ARN: <clusterArn> Status: <status> Reason: <stoppedReason>"
     JdbcTaskAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
@@ -330,7 +330,7 @@ resources:
         ComparisonOperator: GreaterThanOrEqualToThreshold
         DatapointsToAlarm: 2
         EvaluationPeriods: 5
-        MetricName: source.jdbc.mmdl-dbo-1_task_failures
+        MetricName: source.jdbc.appian-dbo-1_task_failures
         Namespace: ${self:service}-${sls:stage}
         Period: 60
         Statistic: Sum
@@ -343,7 +343,7 @@ resources:
         ComparisonOperator: GreaterThanOrEqualToThreshold
         DatapointsToAlarm: 2
         EvaluationPeriods: 5
-        MetricName: source.jdbc.mmdl-dbo-1_failures
+        MetricName: source.jdbc.appian-dbo-1_failures
         Namespace: ${self:service}-${sls:stage}
         Period: 60
         Statistic: Sum

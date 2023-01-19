@@ -96,7 +96,7 @@ yargs(process.argv.slice(2))
   )
   .command(
     "test",
-    "run any available tests for an mmdl stage.",
+    "run any available tests for appian stage.",
     {
       stage: { type: "string", demandOption: true },
     },
