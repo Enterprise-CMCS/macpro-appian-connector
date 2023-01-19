@@ -28,6 +28,7 @@
 ---
 
 ## Overview
+
 A Kafka Connector to stream data changes from Appian to Bigmac.
 
 <p align="center">

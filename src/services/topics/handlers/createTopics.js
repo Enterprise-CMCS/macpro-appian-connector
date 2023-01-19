@@ -4,7 +4,7 @@ const topicList = [
     topic: `aws.appian.cdc.MCP_SPA_PCKG`,
     numPartitions: 1,
     replicationFactor: 3,
-  }
+  },
 ];
 
 exports.handler = async function (event, context, callback) {
