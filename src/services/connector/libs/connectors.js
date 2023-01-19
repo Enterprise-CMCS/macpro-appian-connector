@@ -19,5 +19,5 @@ export const connectors = [
       "key.converter": "org.apache.kafka.connect.json.JsonConverter",
       "key.converter.schemas.enable": false,
     },
-  }
+  },
 ];
