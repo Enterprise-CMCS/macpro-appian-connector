@@ -10,7 +10,7 @@ export const connectors = [
       "topic.prefix": `${process.env.topicNamespace}aws.appian.cdc.`,
       "poll.interval.ms": 2000,
       "batch.max.rows": 1000,
-      "table.whitelist": "APPIAN.MCP_SPA_PCKG,",
+      "table.whitelist": "MACPROTEST1.MCP_SPA_PCKG,",
       mode: "timestamp+incrementing",
       "incrementing.column.name": "PCKG_ID",
       "timestamp.column.name": "UPDT_TS",
