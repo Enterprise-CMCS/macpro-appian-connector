@@ -11,7 +11,7 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: ${env:REGION_A}
   stackTags:
     PROJECT: ${self:custom.project}
@@ -79,7 +79,9 @@ resources:
           Statement:
             - Effect: Allow
               Principal:
-                Service: events.amazonaws.com
+                Service:
+                  - events.amazonaws.com
+                  - cloudwatch.amazonaws.com
               Action: sns:Publish
               Resource: !Ref AlertsTopic
         Topics:
