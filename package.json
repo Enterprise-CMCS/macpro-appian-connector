@@ -1,7 +1,7 @@
 {
   "name": "macpro-appian-connector",
   "type": "module",
-  "description": "A baseline serverless monorepo project that helps get your project up and running faster.",
+  "description": "A microservice sending CMS Appian data to CMS Bigmac.",
   "version": "0.0.0-managed-by-semantic-release",
   "private": true,
   "main": "index.js",
