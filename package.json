@@ -1,7 +1,7 @@
 {
   "name": "macpro-appian-connector",
   "type": "module",
-  "description": "A baseline serverless monorepo project that helps get your project up and running faster.",
+  "description": "A microservice sending CMS Appian data to CMS Bigmac.",
   "version": "0.0.0-managed-by-semantic-release",
   "private": true,
   "main": "index.js",
@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Enterprise-CMCS/macpro-appian-connector#readme",
   "devDependencies": {
+    "@enterprise-cmcs/macpro-serverless-running-stages": "^1.0.4",
     "@serverless/compose": "^1.3.0",
     "@stratiformdigital/security-hub-sync": "^2.0.2",
     "@stratiformdigital/serverless-iam-helper": "^3.2.0",
