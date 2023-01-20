@@ -1,0 +1,8 @@
+{
+  "name": "topics",
+  "version": "1.0.0",
+  "description": "Creates appian topics in CMS Bigmac.",
+  "author": "",
+  "devDependencies": {},
+  "dependencies": {}
+}
