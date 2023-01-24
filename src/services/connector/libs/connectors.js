@@ -20,7 +20,7 @@ export const connectors = [
       "key.converter.schemas.enable": false,
       transforms: "Cast",
       "transforms.Cast.type": "org.apache.kafka.connect.transforms.Cast$Value",
-      "transforms.Cast.spec": "PCKG_ID:int32",
+      "transforms.Cast.spec": "PCKG_ID:float64",
     },
   },
 ];
