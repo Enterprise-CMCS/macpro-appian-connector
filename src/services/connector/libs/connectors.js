@@ -12,21 +12,13 @@ export const connectors = [
       "batch.max.rows": 1000,
       "table.whitelist": `${process.env.legacyschema}.MCP_SPA_PCKG`,
       mode: "timestamp+incrementing",
+      "query": "SELECT *,  CAST(PCKG_ID AS NUMERIC(38,0)) AS PCKG_ID",
       "incrementing.column.name": "PCKG_ID",
       "timestamp.column.name": "UPDT_TS",
       "validate.non.null": false,
       "numeric.mapping": "best_fit",
       "key.converter": "org.apache.kafka.connect.json.JsonConverter",
       "key.converter.schemas.enable": false,
-      transforms: "Cast,createKey,extractInt",
-      "transforms.createKey.type":
-        "org.apache.kafka.connect.transforms.ValueToKey",
-      "transforms.createKey.fields": "PCKG_ID",
-      "transforms.extractInt.type":
-        "org.apache.kafka.connect.transforms.ExtractField$Key",
-      "transforms.extractInt.field": "PCKG_ID",
-      "transforms.Cast.type": "org.apache.kafka.connect.transforms.Cast$Value",
-      "transforms.Cast.spec": "PCKG_ID:int64",
     },
   },
 ];
