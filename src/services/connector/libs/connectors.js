@@ -11,7 +11,7 @@ export const connectors = [
       "poll.interval.ms": 2000,
       "batch.max.rows": 1000,
       mode: "timestamp+incrementing",
-      "query": `SELECT t.*, CAST(PCKG_ID AS NUMERIC(38,0)) AS PCKG_ID FROM MACPROT1.MCP_SPA_PCKG t;`,
+      "query": `SELECT t.*, CAST(PCKG_ID AS NUMERIC(38,0)) AS PCKG_ID FROM MACPROT1.MCP_SPA_PCKG t`,
       "incrementing.column.name": "PCKG_ID",
       "timestamp.column.name": "UPDT_TS",
       "validate.non.null": false,
