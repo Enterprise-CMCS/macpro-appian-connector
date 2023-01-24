@@ -15,18 +15,7 @@ export const connectors = [
       "incrementing.column.name": "PCKG_ID",
       "timestamp.column.name": "UPDT_TS",
       "validate.non.null": false,
-      "numeric.mapping": "best_fit",
-      "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-      "key.converter.schemas.enable": false,
-      transforms: "Cast,createKey,extractInt",
-      "transforms.createKey.type":
-        "org.apache.kafka.connect.transforms.ValueToKey",
-      "transforms.createKey.fields": "PCKG_ID",
-      "transforms.extractInt.type":
-        "org.apache.kafka.connect.transforms.ExtractField$Key",
-      "transforms.extractInt.field": "PCKG_ID",
-      "transforms.Cast.type": "org.apache.kafka.connect.transforms.Cast$Value",
-      "transforms.Cast.spec": "PCKG_ID:int32",
+      "numeric.mapping": "best_fit_eager_double",
     },
   },
 ];
