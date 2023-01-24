@@ -11,7 +11,7 @@ export const connectors = [
       "poll.interval.ms": 2000,
       "batch.max.rows": 1000,
       "table.whitelist": `${process.env.legacyschema}.MCP_SPA_PCKG`,
-      mode: "incrementing",
+      mode: "timestamp",
       "incrementing.column.name": "PCKG_ID",
       "timestamp.column.name": "UPDT_TS",
       "validate.non.null": false,
