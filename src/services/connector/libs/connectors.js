@@ -1,3 +1,5 @@
+import { queryString } from "./query";
+
 export const connectors = [
   {
     name: "source.jdbc.appian-dbo-1",
@@ -11,7 +13,7 @@ export const connectors = [
       "poll.interval.ms": 2000,
       "batch.max.rows": 1000,
       mode: "timestamp+incrementing",
-      query: `SELECT tbl.*, CAST(PCKG_ID AS NUMERIC(38,0)) AS PCKG_ID FROM ${process.env.legacyschema}.MCP_SPA_PCKG tbl`,
+      query: queryString,
       "incrementing.column.name": "PCKG_ID",
       "timestamp.column.name": "UPDT_TS",
       "validate.non.null": false,
