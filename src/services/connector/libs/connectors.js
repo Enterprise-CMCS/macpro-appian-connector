@@ -1,3 +1,5 @@
+import { queryString } from "./query";
+
 export const connectors = [
   {
     name: "source.jdbc.appian-dbo-1",
@@ -10,8 +12,8 @@ export const connectors = [
       "topic.prefix": `${process.env.topicNamespace}aws.appian.cdc.`,
       "poll.interval.ms": 2000,
       "batch.max.rows": 1000,
-      "table.whitelist": "APPIAN.MCP_SPA_PCKG,",
       mode: "timestamp+incrementing",
+      query: queryString,
       "incrementing.column.name": "PCKG_ID",
       "timestamp.column.name": "UPDT_TS",
       "validate.non.null": false,

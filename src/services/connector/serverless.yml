@@ -102,6 +102,7 @@ functions:
       legacyDb: ${self:custom.dbInfo.db}
       legacydbUser: ${self:custom.dbInfo.user}
       legacydbPassword: ${self:custom.dbInfo.password}
+      legacyschema: ${self:custom.dbInfo.schema}
     maximumRetryAttempts: 0
     timeout: 300
     vpc:
