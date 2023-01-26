@@ -12,13 +12,13 @@ permalink: /
 {{ site.description }}
 {: .fs-6 .fw-300 }
 
-[Get started now](#getting-started){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } [View it on GitHub]({{ site.repo.url }}){: .btn .fs-5 .mb-4 .mb-md-0 }
+[View it on GitHub]({{ site.repo.url }}){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 }
 
 ---
 
 ## Welcome!
 
-The {{ site.repo.name }} project is a serverless monorepo accelerator. The actual application is fairly 'hello world', but the repository support and configuration is full featured. This is by design, to allow for simpler project creation from the template. Full CI/CD support with GitHub Actions, automated security scanning, docs site in GitHub Pages, PR/Issue templates, infrastructure and application deployment workflows, etc. is all included.
+The {{ site.repo.name }} project is a Kafka Connector to stream data changes froim Appian to BigMAC. It was created using the [macpro-base-template](https://github.com/Enterprise-CMCS/macpro-base-template) a jumping off point. In addition to the Kafka Connector, this project includes full CI/CD support with GitHub Actions, automated security scanning, infrastructure and application deployment workflows, and documentation hosted in GitHub Pages.
 
 ---
 

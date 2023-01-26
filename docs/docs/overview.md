@@ -20,7 +20,7 @@ The 10,000ft view
 
 ## Overview
 
-The {{ site.repo.name }} project is A Kafka Connector to stream data changes from Appian to Bigmac.
+The {{ site.repo.name }} project is a Kafka Connector to stream data changes from Appian to BigMAC.
 
 ## Architecture
 
