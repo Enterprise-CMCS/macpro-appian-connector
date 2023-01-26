@@ -120,6 +120,7 @@ For the purposes of these instructions, we will assume your new repository (crea
     - Open and edit the project's top level package.json file to be accurate.  Updates should include name, description, repository.url, and homepage.
     - Open and edit the Jekyll config file, docs/_config.yml.  Rather than list each place where a value might need replacing/updating, we recommend you walk through this file in detail.  It's a config file, so most of it's information will need updating.
     - Update the docs site overview information, located at docs/docs/overview.md - subsection Overview.  we recommend reusing the overview you put in the README
+    - Commit and push all changes to your new repository, and check the GitHub Actions for success.
 1. Deploy the OIDC service, and stage the created oidc role information in GitHub Secrets.
     - This requires a fully configured workstation and a developer to run commands.  Be sure the workstation has successfully run through the workspace setup procedure.
     - For the 'dev' AWS environment:
