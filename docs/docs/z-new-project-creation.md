@@ -120,9 +120,7 @@ For the purposes of these instructions, we will assume your new repository (crea
     - Open and edit the project's top level package.json file to be accurate.  Updates should include name, description, repository.url, and homepage.
     - Open and edit the Jekyll config file, docs/_config.yml.  Rather than list each place where a value might need replacing/updating, we recommend you walk through this file in detail.  It's a config file, so most of it's information will need updating.
     - Update the docs site overview information, located at docs/docs/overview.md - subsection Overview.  we recommend reusing the overview you put in the README
-<<<<<<< HEAD
     - Commit and push all changes to your new repository, and check the GitHub Actions for success.
-=======
 1. Deploy the OIDC service, and stage the created oidc role information in GitHub Secrets.
     - This requires a fully configured workstation and a developer to run commands.  Be sure the workstation has successfully run through the workspace setup procedure.
     - For the 'dev' AWS environment:
@@ -155,7 +153,6 @@ For the purposes of these instructions, we will assume your new repository (crea
         - Add a new secret under 'Environment secrets'.  It's name should be AWS_OIDC_ROLE_TO_ASSUME and it's value should should be the ServiceRoleARN value you copied from the above step.
         - This is a great time to set environment protection rules and required reviewers, but we will skip detaili on that at this stage, as that's optional.
 1. Commit and push all changes to your repository, and monitor GitHub Actions for success/failure.
->>>>>>> master
 
 ### Conclusion
 If you’ve followed this document, you should have a new GitHub project deployed to AWS and ready for further development. This document is a WIP, and assuredly has errors and omissions, and will change over time. You can help this by reaching out to the MACPRO Platform team on Slack and letting us know about issues you find.
