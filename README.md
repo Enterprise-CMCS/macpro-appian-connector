@@ -32,7 +32,7 @@
 A Kafka Connector to stream data changes from Appian to BigMAC.
 
 <p align="center">
-  <img width="55%" src="docs/assets/diagram.svg">
+  <img width="55%" src="docs/assets/architecture.png">
 </p>
 
 ## Contributing

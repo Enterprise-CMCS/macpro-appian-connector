@@ -26,7 +26,7 @@ The {{ site.repo.name }} project is a Kafka Connector to stream data changes fro
 
 A diagram is often the best way to communicate the architecture:
 
-![diagram](../assets/diagram.svg)
+![diagram](../assets/architecture.png)
 
 
 ## Development Metrics (DORA)
