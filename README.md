@@ -29,17 +29,17 @@
 
 ## Overview
 
-A Kafka Connector to stream data changes from Appian to Bigmac.
+A Kafka Connector to stream data changes from Appian to BigMAC.
 
 <p align="center">
-  <img width="55%" src="docs/assets/diagram.svg">
+  <img width="55%" src="docs/assets/architecture.png">
 </p>
 
 ## Contributing
 
-Work items for this project are tracked in Jira. Check out the [project kanban board](https://qmacbis.atlassian.net/jira/software/c/projects/OY2/boards/246) to view all work items affecting this repo.
+Work items for this project are tracked in Jira. Check out the [project kanban board](https://qmacbis.atlassian.net/jira/software/c/projects/OY2/boards/240) to view all work items affecting this repo.
 
-If you don't have access to Jira, would like access to Jira, or would like to drop us an idea without pursuing Jira access, please visit the [slack channel](https://cmsgov.slack.com/archives/C0403M0D007).
+If you don't have access to Jira, would like access to Jira, or would like to drop us an idea without pursuing Jira access, please visit the [slack channel](https://cmsgov.slack.com/archives/C04K1444K89).
 
 ## License
 
