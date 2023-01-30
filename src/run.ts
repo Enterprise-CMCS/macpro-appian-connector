@@ -158,7 +158,7 @@ yargs(process.argv.slice(2))
   )
   .command(
     "deleteTopics",
-    "Deletes topics from Bigmac which were created by development/ephemeral branches.",
+    "Deletes topics from BigMAC which were created by development/ephemeral branches.",
     {
       stage: { type: "string", demandOption: true },
       // verify: { type: "boolean", demandOption: false, default: true },

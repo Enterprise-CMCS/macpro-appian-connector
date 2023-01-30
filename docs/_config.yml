@@ -1,17 +1,4 @@
-# Welcome to Jekyll!
-#
-# This is the main configuration file for the documentation site, powered by Jekyll.
-# You can read about Jekyll configuration options here: https://jekyllrb.com/docs/configuration/
-# The variables set in this file are used by Jekyll, and are also referenced by documentation pages
-# throughout the site with the syntax {{ site.my_variable_path_from_config_yml }}
-#   ex:  "This is the {{ site.title }}" ->  "This is the Base Template"
-# That's the short story.  Please update this file for your project.
-# If running Jekyll locally, changes to this file require a full restart of Jekyll.
-# Thanks, and have fun!  
-#   - MACPro Platform Team
-
-title: Base Template
-description: A baseline serverless monorepo project that helps get your project up and running faster.
+title: Appian Connector
 # baseurl: "/just-the-docs" # the subpath of your site, e.g. /blog
 url: "https://enterprise-cmcs.github.io/macpro-appian-connector/" # the base hostname & protocol for your site, e.g. http://example.com
 
