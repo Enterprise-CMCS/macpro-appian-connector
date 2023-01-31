@@ -1,5 +1,3 @@
-import { queryString } from "./query";
-
 export const connectors = [
   {
     name: "source.jdbc.appian-dbo-1",
@@ -12,27 +10,25 @@ export const connectors = [
       "topic.prefix": `${process.env.topicNamespace}aws.appian.cdc.`,
       "poll.interval.ms": 2000,
       "batch.max.rows": 1000,
-      mode: "timestamp+incrementing",
       "table.whitelist": `${process.env.legacyschema}.MCP_SPA_PCKG`,
-      [`table.${process.env.legacyschema}.MCP_SPA_PCKG.query`]: queryString,
+      mode: "timestamp+incrementing",
       "incrementing.column.name": "PCKG_ID",
       "timestamp.column.name": "UPDT_TS",
       "validate.non.null": false,
       "numeric.mapping": "best_fit",
       "key.converter": "org.apache.kafka.connect.json.JsonConverter",
       "key.converter.schemas.enable": false,
+      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+      "value.converter.schemas.enable": false,
+      transforms: "createKey,extractInt,Cast",
+      "transforms.createKey.type":
+        "org.apache.kafka.connect.transforms.ValueToKey",
+      "transforms.createKey.fields": "PCKG_ID",
+      "transforms.extractInt.type":
+        "org.apache.kafka.connect.transforms.ExtractField$Key",
+      "transforms.extractInt.field": "PCKG_ID",
+      "transforms.Cast.type": "org.apache.kafka.connect.transforms.Cast$Value",
+      "transforms.Cast.spec":"PCKG_ID:int32",
     },
   },
 ];
-
-      // "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-      // "value.converter.schemas.enable": false,
-      // transforms: "createKey,extractInt,Cast",
-      // "transforms.createKey.type":
-      //   "org.apache.kafka.connect.transforms.ValueToKey",
-      // "transforms.createKey.fields": "PCKG_ID",
-      // "transforms.extractInt.type":
-      //   "org.apache.kafka.connect.transforms.ExtractField$Key",
-      // "transforms.extractInt.field": "PCKG_ID",
-      // "transforms.Cast.type": "org.apache.kafka.connect.transforms.Cast$Value",
-      // "transforms.Cast.spec":"PCKG_ID:int32",
