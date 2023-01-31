@@ -18,8 +18,6 @@ export const connectors = [
       "numeric.mapping": "best_fit",
       "key.converter": "org.apache.kafka.connect.json.JsonConverter",
       "key.converter.schemas.enable": false,
-      "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-      "value.converter.schemas.enable": false,
       transforms: "createKey,extractInt,Cast",
       "transforms.createKey.type":
         "org.apache.kafka.connect.transforms.ValueToKey",
