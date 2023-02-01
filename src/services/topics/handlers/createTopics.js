@@ -1,7 +1,7 @@
 import * as topics from "../../../libs/topics-lib.js";
 const topicList = [
   {
-    topic: `aws.appian.cdc.MCP_SPA_PCKG`,
+    topic: `aws.mmdl.cdc.TESTJD_MCP_SPA_PCKG`,
     numPartitions: 1,
     replicationFactor: 3,
   },
