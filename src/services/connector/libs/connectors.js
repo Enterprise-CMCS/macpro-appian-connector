@@ -11,7 +11,7 @@ export const connectors = [
       "poll.interval.ms": 2000,
       "batch.max.rows": 1000,
       // "table.whitelist": `${process.env.legacyschema}.MCP_SPA_PCKG`,
-      "query": "SELECT CAST(PCKG_ID AS NUMERIC(8,0)) AS PCKG_ID, UPDT_TS FROM `${process.env.legacyschema}.MCP_SPA_PCKG`",
+      "query": `SELECT CAST(PCKG_ID AS NUMERIC(8,0)) AS PCKG_ID FROM ${process.env.legacyschema}.MCP_SPA_PCKG`,
       mode: "timestamp+incrementing",
       "incrementing.column.name": "PCKG_ID",
       "timestamp.column.name": "UPDT_TS",
