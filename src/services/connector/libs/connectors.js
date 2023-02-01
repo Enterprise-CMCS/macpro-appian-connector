@@ -1,6 +1,6 @@
 export const connectors = [
   {
-    name: "source.jdbc.appian-dbo-1",
+    name: "source.jdbc.mmdl-dbo-1",
     config: {
       "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
       "tasks.max": 1,
