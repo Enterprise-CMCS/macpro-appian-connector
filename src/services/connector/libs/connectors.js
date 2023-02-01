@@ -7,7 +7,7 @@ export const connectors = [
       "connection.user": process.env.legacydbUser,
       "connection.password": process.env.legacydbPassword,
       "connection.url": `jdbc:oracle:thin:@${process.env.legacydbIp}:${process.env.legacydbPort}:${process.env.legacyDb}`,
-      "topic.prefix": `${process.env.topicNamespace}aws.mmdl.cdc.`,
+      "topic.prefix": `${process.env.topicNamespace}aws.appian.cdc.`,
       "poll.interval.ms": 2000,
       "batch.max.rows": 1000,
       // "table.whitelist": `${process.env.legacyschema}.MCP_SPA_PCKG`,
