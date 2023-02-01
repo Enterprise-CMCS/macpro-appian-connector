@@ -1,0 +1,376 @@
+service: ${self:custom.project}-ksqldb
+
+frameworkVersion: "3"
+
+package:
+  individually: true
+
+plugins:
+  - serverless-bundle
+  - serverless-plugin-scripts
+  - serverless-stack-termination-protection
+  - "@stratiformdigital/serverless-iam-helper"
+  - "@stratiformdigital/serverless-idempotency-helper"
+  - "@stratiformdigital/serverless-s3-security-helper"
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: ${env:REGION_A}
+  stackTags:
+    PROJECT: ${self:custom.project}
+    SERVICE: ${self:service}
+  iam:
+    role:
+      path: /delegatedadmin/developer/
+      permissionsBoundary: arn:aws:iam::${aws:accountId}:policy/cms-cloud-admin/developer-boundary-policy
+
+custom:
+  project: ${env:PROJECT}
+  serverlessTerminationProtection:
+    stages: # Apply CloudFormation termination protection for these stages
+      - master
+      - val
+      - production
+  vpc: ${ssm:/aws/reference/secretsmanager/${self:custom.project}/${sls:stage}/vpc, ssm:/aws/reference/secretsmanager/${self:custom.project}/default/vpc}
+  brokerString: ${ssm:/aws/reference/secretsmanager/${self:custom.project}/${sls:stage}/brokerString, ssm:/aws/reference/secretsmanager/${self:custom.project}/default/brokerString}
+  ksqldbImage: ${ssm:/aws/reference/secretsmanager/ecr/images/${self:custom.project}/${self:service}, "confluentinc/ksqldb-server:0.26.0"}
+  headlessSqlContents: ${file(./compileDDL.js):ddl}
+  scripts:
+    hooks:
+      package:initialize: |
+        set -e
+        set -x
+        echo "${self:custom.headlessSqlContents}" > combined.sql
+        zip combined.sql.zip combined.sql
+    commands:
+      connect: |
+        runningInteractiveTasks=(`aws --region ${self:provider.region} ecs list-tasks --cluster ${self:service}-${sls:stage}-connect --service-name ksqldb-interactive --desired-status RUNNING | jq -r ".taskArns[]"`)
+        runningHeadlessTasks=(`aws --region ${self:provider.region} ecs list-tasks --cluster ${self:service}-${sls:stage}-connect --service-name ksqldb-headless --desired-status RUNNING | jq -r ".taskArns[]"`)
+        echo "\nThe following command(s) may be used to exec onto running fargate tasks.  Note, if there are no commands shown, there are no runnings tasks:"
+        for task in "${runningInteractiveTasks[@]}"
+        do
+          echo "INTERACTIVE tasks:"
+          echo aws --region ${self:provider.region} ecs execute-command --cluster ${self:service}-${sls:stage}-connect --task ${task##*/} --container ksqldb-interactive --interactive --command "/bin/sh"
+        done
+        for task in "${runningHeadlessTasks[@]}"
+        do
+          echo "HEADLESS tasks:"
+          echo aws --region ${self:provider.region} ecs execute-command --cluster ${self:service}-${sls:stage}-connect --task ${task##*/} --container ksqldb-headless --interactive --command "/bin/sh"
+        done
+
+params:
+  master:
+    topicNamespace: ""
+  val:
+    topicNamespace: ""
+  production:
+    cpu: 4096
+    heap: "-Xms15G -Xmx15G"
+    memory: 30720
+    rocksdbCache: 10737418240
+    topicNamespace: ""
+  default:
+    cpu: 2048
+    heap: "-Xms4G -Xmx4G"
+    memory: 8192
+    rocksdbCache: 2147483648
+    topicNamespace: --${self:custom.project}--${sls:stage}--
+
+layers:
+  dummy:
+    name: dummy-${sls:stage}
+    package:
+      artifact: combined.sql.zip
+
+functions:
+  dummyFunc:
+    handler: handlers/dummy.myHandler
+    layers:
+      - !Ref DummyLambdaLayer
+
+resources:
+  Resources:
+    ksqldbHeadlessLogGroup:
+      Type: "AWS::Logs::LogGroup"
+      Properties:
+        LogGroupName: /aws/fargate/${self:service}-${sls:stage}-ksqldb-headless
+    ksqldbSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Security Group for the Fargate
+        VpcId: ${self:custom.vpc.id}
+    ksqldbSecurityGroupIngressCluster:
+      Type: AWS::EC2::SecurityGroupIngress
+      Properties:
+        GroupId: !Sub "${ksqldbSecurityGroup}"
+        IpProtocol: tcp
+        FromPort: 8088
+        ToPort: 8088
+        SourceSecurityGroupId: !Sub "${ksqldbSecurityGroup}"
+    ksqldbHeadlessRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - "ecs.amazonaws.com"
+                  - "ecs-tasks.amazonaws.com"
+              Action: "sts:AssumeRole"
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        Policies:
+          - PolicyName: s3Policy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:GetObject
+                    - S3:ListBucket
+                  Resource: "*"
+                  Policies:
+                - Effect: Allow
+                  Action:
+                    - ssmmessages:CreateControlChannel
+                    - ssmmessages:CreateDataChannel
+                    - ssmmessages:OpenControlChannel
+                    - ssmmessages:OpenDataChannel
+                  Resource: "*"
+                - Effect: Allow
+                  Action:
+                    - ecr:BatchGetImage
+                  Resource: !Sub "arn:aws:ecr:${self:provider.region}:${AWS::AccountId}:repository/*"
+
+    ksqldbHeadlessTaskDefinition:
+      Type: "AWS::ECS::TaskDefinition"
+      Properties:
+        ContainerDefinitions:
+          - Name: ksqldb-headless
+            Image: ${self:custom.ksqldbImage}
+            Ulimits:
+              - Name: "nofile"
+                HardLimit: 1048576
+                SoftLimit: 1048576
+            User: "root"
+            Command:
+              - bash
+              - "-c"
+              - |
+                export CONNECT_REST_HOST_NAME=`curl $ECS_CONTAINER_METADATA_URI_V4 | sed -e 's/.*IPv4Addresses":\["\(.*\)"\],"AttachmentIndex.*/\1/'` &&
+                echo $CONNECT_REST_HOST_NAME self >> /etc/hosts &&
+                echo "Headless ksqlDB task..." &&
+                yum install unzip -y &&
+                curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" &&
+                unzip awscliv2.zip &&
+                ./aws/install &&
+                KEY=`aws s3 ls $DEPLOYMENT_BUCKET --recursive | exec grep 'combined.sql.zip' | sort | tail -n 1 | awk '{print $4}'` &&
+                echo $BUCKET $KEY
+                aws s3 cp s3://$DEPLOYMENT_BUCKET/$KEY . &&
+                unzip combined.sql.zip &&
+                mv combined.sql /home/appuser/headless.sql &&
+                cat /home/appuser/headless.sql &&
+                wget https://ksqldb-maven.s3-us-west-2.amazonaws.com/maven/io/confluent/ksql/ksql-rocksdb-config-setter/0.7.1/ksql-rocksdb-config-setter-0.7.1.jar -O /usr/share/java/ksqldb-rest-app/ksql-rocksdb-config-setter-0.7.1.jar &&
+                echo "ksql.streams.rocksdb.config.setter=io.confluent.ksql.rocksdb.KsqlBoundedMemoryRocksDBConfigSetter" >> /etc/ksqldb/ksqldb-server.properties &&
+                echo "ksql.plugins.rocksdb.cache.size={param:rocksdbCache}" >> /etc/ksqldb/ksqldb-server.properties &&
+                echo "ksql.plugins.rocksdb.write.buffer.cache.use=true" >> /etc/ksqldb/ksqldb-server.properties &&
+                echo "ksql.plugins.rocksdb.num.background.threads=1" >> /etc/ksqldb/ksqldb-server.properties &&
+                /usr/bin/docker/run
+            Environment:
+              - Name: KSQL_LISTENERS
+                Value: "http://0.0.0.0:8088"
+              - Name: KSQL_BOOTSTRAP_SERVERS
+                Value: "${self:custom.brokerString}"
+              - Name: KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE
+                Value: "true"
+              - Name: KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE
+                Value: "true"
+              - Name: KSQL_SECURITY_PROTOCOL
+                Value: SSL
+              - Name: KSQL_KSQL_INTERNAL_TOPIC_REPLICAS
+                Value: 3
+              - Name: KSQL_KSQL_INTERNAL_TOPIC_MIN_INSYNC_REPLICAS
+                Value: 2
+              - Name: KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR
+                Value: 3
+              - Name: KSQL_KSQL_STREAMS_REPLICATION_FACTOR
+                Value: 3
+              - Name: KSQL_KSQL_STREAMS_PRODUCER_ACKS
+                Value: "all"
+              - Name: KSQL_KSQL_STREAMS_TOPIC_MIN_INSYNC_REPLICAS
+                Value: 2
+              - Name: KSQL_KSQL_QUERIES_FILE
+                Value: "/home/appuser/headless.sql"
+              - Name: KSQL_KSQL_SERVICE_ID
+                Value: "${param:topicNamespace}${self:service}-headless"
+              - Name: KSQL_KSQL_STREAMS_PRODUCER_DELIVERY_TIMEOUT_MS
+                Value: 2147483647
+              - Name: KSQL_KSQL_STREAMS_PRODUCER_MAX_BLOCK_MS
+                Value: 9223372036854774000
+              - Name: DEPLOYMENT_BUCKET
+                Value: !Ref ServerlessDeploymentBucket
+              - Name: KSQL_CLASSPATH
+                Value: "/usr/share/java/ksqldb-rest-app/*"
+              - Name: KSQL_HEAP_OPTS
+                Value: ${param:heap}
+            LogConfiguration:
+              LogDriver: awslogs
+              Options:
+                awslogs-region: !Sub "${AWS::Region}"
+                awslogs-group: !Sub "${ksqldbHeadlessLogGroup}"
+                awslogs-stream-prefix: fargate
+                awslogs-datetime-format: \[%Y-%m-%d %H:%M:%S,
+        Family: ${self:service}-${sls:stage}-ksqldb-headless
+        NetworkMode: awsvpc
+        ExecutionRoleArn: !GetAtt ksqldbHeadlessRole.Arn
+        TaskRoleArn: !GetAtt ksqldbHeadlessRole.Arn
+        RequiresCompatibilities:
+          - FARGATE
+        Memory: ${param:memory}
+        Cpu: ${param:cpu}
+        EphemeralStorage: 200
+
+    ksqldbHeadlessCluster:
+      Type: "AWS::ECS::Cluster"
+      Properties:
+        ClusterName: ${self:service}-${sls:stage}-connect
+
+    ksqldbHeadlessService:
+      Type: "AWS::ECS::Service"
+      Properties:
+        Cluster: !Sub "${ksqldbHeadlessCluster}"
+        DeploymentConfiguration:
+          DeploymentCircuitBreaker:
+            Enable: true
+            Rollback: false
+          MaximumPercent: 100
+          MinimumHealthyPercent: 0
+        EnableExecuteCommand: true
+        LaunchType: FARGATE
+        ServiceName: ksqldb-headless
+        DesiredCount: 1
+        TaskDefinition: !Sub "${ksqldbHeadlessTaskDefinition}"
+        NetworkConfiguration:
+          AwsvpcConfiguration:
+            AssignPublicIp: DISABLED
+            SecurityGroups:
+              - !Sub "${ksqldbSecurityGroup}"
+            Subnets: >-
+              ${self:custom.vpc.privateSubnets}
+    ECSFailureEventRule:
+      Type: AWS::Events::Rule
+      Properties:
+        Description: "ksqlDB Cluster Task Failure Event Rule"
+        EventPattern:
+          account:
+            - !Sub "${AWS::AccountId}"
+          source:
+            - "aws.ecs"
+            - "demo.cli" # used to test events from the command line
+          detail-type:
+            - "ECS Task State Change"
+          detail:
+            lastStatus:
+              - "STOPPED"
+            stoppedReason:
+              - "Essential container in task exited"
+              - "Task failed container health checks"
+            clusterArn:
+              - !GetAtt ksqldbHeadlessCluster.Arn
+        Targets:
+          - Arn: ${param:ecsFailureTopicArn}
+            Id: "KsqlDbEcsTaskFailure"
+            InputTransformer:
+              InputPathsMap:
+                "clusterArn": "$.detail.clusterArn"
+                "status": "$.detail.lastStatus"
+                "account": "$.account"
+                "stoppedReason": "$.detail.stoppedReason"
+              InputTemplate: |
+                "A KsqlDB Cluster Task Failure Event has occured. Account: <account> Cluster ARN: <clusterArn> Status: <status> Reason: <stoppedReason>"
+
+    ksqldbIntLogGroup:
+      Type: "AWS::Logs::LogGroup"
+      Properties:
+        LogGroupName: /aws/fargate/${self:service}-${sls:stage}-ksqldbInt
+
+    ksqldbIntTaskDefinition:
+      Type: "AWS::ECS::TaskDefinition"
+      Properties:
+        ContainerDefinitions:
+          - Name: ksqldb-interactive
+            Image: ${self:custom.ksqldbImage}
+            Command:
+              - bash
+              - "-c"
+              - |
+                df -h &&
+                echo "int ksqlDB task..." &&
+                cd ~ &&
+                curl -O https://packages.confluent.io/archive/7.0/confluent-community-7.0.0.tar.gz &&
+                tar -xzvf confluent-community-7.0.0.tar.gz &&
+                ln -s confluent-community-7.0.0 confluent-community &&
+                /usr/bin/docker/run
+            Environment:
+              - Name: KSQL_LISTENERS
+                Value: "http://0.0.0.0:8088"
+              - Name: KSQL_BOOTSTRAP_SERVERS
+                Value: "${self:custom.brokerString}"
+              - Name: KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE
+                Value: "true"
+              - Name: KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE
+                Value: "true"
+              - Name: KSQL_SECURITY_PROTOCOL
+                Value: SSL
+              - Name: KSQL_KSQL_INTERNAL_TOPIC_REPLICAS
+                Value: 3
+              - Name: KSQL_KSQL_INTERNAL_TOPIC_MIN_INSYNC_REPLICAS
+                Value: 2
+              - Name: KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR
+                Value: 3
+              - Name: KSQL_KSQL_STREAMS_REPLICATION_FACTOR
+                Value: 3
+              - Name: KSQL_KSQL_STREAMS_PRODUCER_ACKS
+                Value: "all"
+              - Name: KSQL_KSQL_STREAMS_TOPIC_MIN_INSYNC_REPLICAS
+                Value: 2
+              - Name: KSQL_KSQL_SERVICE_ID
+                Value: "${param:topicNamespace}${self:service}-int"
+            LogConfiguration:
+              LogDriver: awslogs
+              Options:
+                awslogs-region: !Sub "${AWS::Region}"
+                awslogs-group: !Sub "${ksqldbIntLogGroup}"
+                awslogs-stream-prefix: fargate
+                awslogs-datetime-format: \[%Y-%m-%d %H:%M:%S,
+        Family: ${self:service}-${sls:stage}-ksqldbInt
+        NetworkMode: awsvpc
+        ExecutionRoleArn: !GetAtt ksqldbHeadlessRole.Arn
+        TaskRoleArn: !GetAtt ksqldbHeadlessRole.Arn
+        RequiresCompatibilities:
+          - FARGATE
+        Memory: 4GB
+        Cpu: "${param:cpu}"
+        EphemeralStorage: 50
+    ksqldbIntService:
+      Type: "AWS::ECS::Service"
+      Properties:
+        Cluster: !Sub "${ksqldbHeadlessCluster}"
+        DeploymentConfiguration:
+          MaximumPercent: 100
+          MinimumHealthyPercent: 0
+        LaunchType: FARGATE
+        ServiceName: ksqldb-interactive
+        DesiredCount: 0
+        TaskDefinition: !Sub "${ksqldbIntTaskDefinition}"
+        EnableExecuteCommand: true
+        NetworkConfiguration:
+          AwsvpcConfiguration:
+            AssignPublicIp: DISABLED
+            SecurityGroups:
+              - !Sub "${ksqldbSecurityGroup}"
+            Subnets: >-
+              ${self:custom.vpc.privateSubnets}
