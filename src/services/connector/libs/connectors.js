@@ -29,3 +29,4 @@ export const connectors = [
     "transforms.Cast.spec": "PCKG_ID:int32,PCKG_VRSN:int32,PCKG_DAYS_ELPSD:int32,PCKG_DAYS_ALLWD:int32,HLC_ID:int32,SBMSSN_TYPE_PKG_ID:int32,LOCK_FLAG:int32,RVW_SQNC:int32,PRFL_ID:int32,HLC_LVL_ID:int32,SRC_DRAFT_PKG_ID:int32",
    },
   },
+];
