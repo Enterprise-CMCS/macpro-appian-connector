@@ -20,6 +20,6 @@ export const connectors = [
       "numeric.mapping": "best_fit",
       "key.converter": "org.apache.kafka.connect.json.JsonConverter",
       "key.converter.schemas.enable": false,
-    }
+    },
   },
 ];
