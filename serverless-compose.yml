@@ -10,7 +10,3 @@ services:
     params:
       ecsFailureTopicArn: ${alerts.ECSFailureTopicArn}
     dependsOn: topics
-  ksqldb:
-    path: src/services/ksqldb
-    params:
-      ecsFailureTopicArn: ${alerts.ECSFailureTopicArn}
