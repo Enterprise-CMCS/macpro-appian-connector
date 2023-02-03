@@ -2,7 +2,7 @@ import { queryString } from "./query";
 
 export const connectors = [
   {
-    name: "source.jdbc.appian-dbo-1",
+    name: "source.jdbc.appian-connector-dbo-1",
     config: {
       "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
       "tasks.max": 1,
