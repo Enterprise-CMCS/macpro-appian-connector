@@ -9,7 +9,7 @@ export const connectors = [
       "connection.user": process.env.legacydbUser,
       "connection.password": process.env.legacydbPassword,
       "connection.url": `jdbc:oracle:thin:@${process.env.legacydbIp}:${process.env.legacydbPort}:${process.env.legacyDb}`,
-      "topic.prefix": `${process.env.topicNamespace}aws.appian.cmcs.MCP_SPA_PCKG`,
+      "topic.prefix": `${process.env.topicNamespace}aws.appian.cdc.MCP_SPA_PCKG`,
       "poll.interval.ms": 2000,
       "batch.max.rows": 1000,
       query: queryString,
