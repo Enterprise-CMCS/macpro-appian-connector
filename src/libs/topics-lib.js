@@ -113,6 +113,7 @@ export async function deleteTopics(brokerString, topicNamespace) {
     clientId: "admin",
     brokers: brokers,
     ssl: true,
+    requestTimeout: 295000, // 5s short of the lambda function's timeout
   });
   var admin = kafka.admin();
 
@@ -127,6 +128,5 @@ export async function deleteTopics(brokerString, topicNamespace) {
 
   await admin.deleteTopics({
     topics: topicsToDelete,
-    timeout: 300,
   });
 }
