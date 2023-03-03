@@ -1,7 +1,7 @@
 const _ = require("lodash");
 import { Kafka, ResourceTypes } from "kafkajs";
 
-export async function createTopics(brokerString, topicNamespace, topicsConfig) {
+export async function createTopics(brokerString, topicsConfig) {
   const topics = topicsConfig;
   const brokers = brokerString.split(",");
 
@@ -30,16 +30,9 @@ export async function createTopics(brokerString, topicNamespace, topicsConfig) {
     );
     console.log("Topics Metadata:", JSON.stringify(topicsMetadata, null, 2));
 
-    //namespace the topics, if needed
-    var namespacedTopics = _.map(topics, function (ref) {
-      var a = { ...ref };
-      a.topic = `${topicNamespace}${a.topic}`;
-      return a;
-    });
-
     //diff the existing topics array with the topic configuration collection
     const topicsToCreate = _.differenceWith(
-      namespacedTopics,
+      topics,
       existingTopicList,
       (topicConfig, topic) => _.get(topicConfig, "topic") == topic
     );
@@ -48,7 +41,7 @@ export async function createTopics(brokerString, topicNamespace, topicsConfig) {
     //where partition count of topic in Kafka is less than what is specified in the topic configuration collection
     //...can't remove partitions, only add them
     const topicsToUpdate = _.intersectionWith(
-      namespacedTopics,
+      topics,
       topicsMetadata,
       (topicConfig, topicMetadata) =>
         _.get(topicConfig, "topic") == _.get(topicMetadata, "name") &&
@@ -102,9 +95,12 @@ export async function createTopics(brokerString, topicNamespace, topicsConfig) {
   await create();
 }
 
-export async function deleteTopics(brokerString, topicNamespace) {
-  if (!topicNamespace.startsWith("--")) {
-    throw "ERROR:  The deleteTopics function only operates against topics that begin with --.";
+export async function deleteTopics(brokerString, topicList) {
+  // Check that each topic in the list is something we can delete
+  for (var topic of topicList) {
+    if (!topic.match(/.*--.*--.*--.*/g)) {
+      throw "ERROR:  The deleteTopics function only operates against topics that match /.*--.*--.*--.*/g";
+    }
   }
 
   const brokers = brokerString.split(",");
@@ -120,13 +116,17 @@ export async function deleteTopics(brokerString, topicNamespace) {
   await admin.connect();
 
   const currentTopics = await admin.listTopics();
-  var topicsToDelete = _.filter(currentTopics, function (n) {
-    console.log(n);
-    return n.startsWith(topicNamespace);
-  });
-  console.log(`Deleting topics:  ${topicsToDelete}`);
 
+  let topicsToDelete = _.filter(currentTopics, function (currentTopic) {
+    return topicList.some((pattern) => {
+      return !!currentTopic.match(pattern);
+    });
+  });
+
+  console.log(`Deleting topics:  ${topicsToDelete}`);
   await admin.deleteTopics({
     topics: topicsToDelete,
   });
+
+  await admin.disconnect();
 }

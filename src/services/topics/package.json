@@ -1,8 +1,0 @@
-{
-  "name": "topics",
-  "version": "1.0.0",
-  "description": "Creates Appian topics in CMS BigMAC.",
-  "author": "",
-  "devDependencies": {},
-  "dependencies": {}
-}
