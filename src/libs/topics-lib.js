@@ -126,6 +126,7 @@ export async function deleteTopics(brokerString, topicList) {
   console.log(`Deleting topics:  ${topicsToDelete}`);
   await admin.deleteTopics({
     topics: topicsToDelete,
+    timeout: 295000,
   });
 
   await admin.disconnect();
