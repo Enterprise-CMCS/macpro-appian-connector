@@ -2,3 +2,12 @@
 # yarn lockfile v1
 
 
+cfn-response-async@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/cfn-response-async/-/cfn-response-async-1.0.0.tgz#92cfe1756413a0cce9b50e86e1f5519951d18989"
+  integrity sha512-/uSeKzALcu0SDieUwu9LwqxTYX4IpX3JAyNAfQ6menx7Y2FfERAUw884Qk4/o+KYZNsaPXjFaEwGHsyrQP/FJA==
+
+lodash@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==

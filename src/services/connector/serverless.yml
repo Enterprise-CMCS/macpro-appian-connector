@@ -91,6 +91,22 @@ params:
     topicNamespace: --${self:custom.project}--${sls:stage}--
 
 functions:
+  createTopics:
+    handler: handlers/createTopics.handler
+    vpc:
+      securityGroupIds:
+        - Ref: LambdaSecurityGroup
+      subnetIds: >-
+        ${self:custom.vpc.privateSubnets}
+    timeout: 300
+  cleanupKafka:
+    handler: handlers/cleanupKafka.handler
+    vpc:
+      securityGroupIds:
+        - Ref: LambdaSecurityGroup
+      subnetIds: >-
+        ${self:custom.vpc.privateSubnets}
+    timeout: 300
   configureConnectors:
     handler: handlers/configureConnectors.handler
     environment:
@@ -126,7 +142,40 @@ functions:
         ${self:custom.vpc.privateSubnets}
 
 resources:
+  Conditions:
+    isDev:
+      Fn::Not:
+        - Fn::Equals:
+            - ${param:topicNamespace}
+            - ""
   Resources:
+    CreateTopics:
+      Type: AWS::CloudFormation::CustomResource
+      Properties:
+        ServiceToken: !GetAtt CreateTopicsLambdaFunction.Arn
+        BrokerString: ${self:custom.brokerString}
+        TopicsToCreate:
+          - name: ${param:topicNamespace}aws.appian.cmcs.MCP_SPA_PCKG
+    CleanupTopics:
+      Type: AWS::CloudFormation::CustomResource
+      Condition: isDev # We only clean up topics in lower environments where isDev is true
+      Properties:
+        ServiceToken: !GetAtt CleanupKafkaLambdaFunction.Arn
+        BrokerString: ${self:custom.brokerString}
+        TopicPatternsToDelete:
+          - ${param:topicNamespace}aws.appian.cmcs*
+          - ${param:topicNamespace}mgmt.connect.${self:service}*
+    LambdaSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Security Group for the topics lambda function
+        VpcId: ${self:custom.vpc.id}
+    LambdaSecurityGroupEgress:
+      Type: AWS::EC2::SecurityGroupEgress
+      Properties:
+        GroupId: !Ref LambdaSecurityGroup
+        IpProtocol: -1
+        CidrIp: 0.0.0.0/0
     KafkaConnectWorkerLogGroup:
       Type: "AWS::Logs::LogGroup"
       Properties:
@@ -265,6 +314,13 @@ resources:
           - FARGATE
         Memory: 4GB
         Cpu: 2048
+        Tags:
+          - Key: ConditionalDependencyHack # Ensures order based on a conditioanl resource
+            Value:
+              Fn::If:
+                - isDev
+                - !Ref CleanupTopics
+                - Blank
     KafkaConnectCluster:
       Type: "AWS::ECS::Cluster"
       Properties:
