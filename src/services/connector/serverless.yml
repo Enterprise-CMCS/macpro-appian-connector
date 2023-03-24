@@ -468,26 +468,19 @@ resources:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: ${self:service}-${sls:stage}-KafkaConnectService-CPUUtilization
-        AlarmDescription: "Trigger an alarm when the CPU utilization reaches 75%"
+        AlarmDescription: Trigger an alarm when the CPU utilization reaches 75%
         Namespace: AWS/ECS
-        MetricName: "CPUUtilization"
+        MetricName: CPUUtilization
         Dimensions:
           - Name: ClusterName
             Value: !Ref KafkaConnectCluster
           - Name: ServiceName
-            Value:
-              !Select [
-                2,
-                !Split [
-                  "/",
-                  !Select [5, !Split [":", !Ref KafkaConnectService]],
-                ],
-              ]
-        Statistic: "Average"
-        Period: "300"
-        EvaluationPeriods: "2"
-        Threshold: "75"
-        ComparisonOperator: "GreaterThanOrEqualToThreshold"
+            Value: !GetAtt KafkaConnectService.Name
+        Statistic: Average
+        Period: 60
+        EvaluationPeriods: 2
+        Threshold: 75
+        ComparisonOperator: GreaterThanOrEqualToThreshold
         AlarmActions:
           - ${param:ecsFailureTopicArn}
         OKActions:
@@ -496,26 +489,19 @@ resources:
       Type: AWS::CloudWatch::Alarm
       Properties:
         AlarmName: ${self:service}-${sls:stage}-KafkaConnectService-MemoryUtilization
-        AlarmDescription: "Trigger an alarm when the Memory utilization reaches 75%"
+        AlarmDescription: Trigger an alarm when the Memory utilization reaches 75%
         Namespace: AWS/ECS
-        MetricName: "MemoryUtilization"
+        MetricName: MemoryUtilization
         Dimensions:
           - Name: ClusterName
             Value: !Ref KafkaConnectCluster
           - Name: ServiceName
-            Value:
-              !Select [
-                2,
-                !Split [
-                  "/",
-                  !Select [5, !Split [":", !Ref KafkaConnectService]],
-                ],
-              ]
-        Statistic: "Average"
-        Period: "300"
-        EvaluationPeriods: "2"
-        Threshold: "75"
-        ComparisonOperator: "GreaterThanOrEqualToThreshold"
+            Value: !GetAtt KafkaConnectService.Name
+        Statistic: Average
+        Period: 60
+        EvaluationPeriods: 2
+        Threshold: 75
+        ComparisonOperator: GreaterThanOrEqualToThreshold
         AlarmActions:
           - ${param:ecsFailureTopicArn}
         OKActions:
