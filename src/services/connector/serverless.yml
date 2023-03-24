@@ -464,6 +464,48 @@ resources:
         MetricName: ConnectorLogsWarnCount
         Namespace: ${self:service}-${sls:stage}/Connector/WARNS
         Statistic: Sum
+    KafkaConnectServiceECSCpuAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: ${self:service}-${sls:stage}-KafkaConnectService-CPUUtilization
+        AlarmDescription: Trigger an alarm when the CPU utilization reaches 75%
+        Namespace: AWS/ECS
+        MetricName: CPUUtilization
+        Dimensions:
+          - Name: ClusterName
+            Value: !Ref KafkaConnectCluster
+          - Name: ServiceName
+            Value: !GetAtt KafkaConnectService.Name
+        Statistic: Average
+        Period: 60
+        EvaluationPeriods: 2
+        Threshold: 75
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        AlarmActions:
+          - ${param:ecsFailureTopicArn}
+        OKActions:
+          - $${param:ecsFailureTopicArn}
+    KafkaConnectServiceECSMemoryAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: ${self:service}-${sls:stage}-KafkaConnectService-MemoryUtilization
+        AlarmDescription: Trigger an alarm when the Memory utilization reaches 75%
+        Namespace: AWS/ECS
+        MetricName: MemoryUtilization
+        Dimensions:
+          - Name: ClusterName
+            Value: !Ref KafkaConnectCluster
+          - Name: ServiceName
+            Value: !GetAtt KafkaConnectService.Name
+        Statistic: Average
+        Period: 60
+        EvaluationPeriods: 2
+        Threshold: 75
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        AlarmActions:
+          - ${param:ecsFailureTopicArn}
+        OKActions:
+          - ${param:ecsFailureTopicArn}
 
   Outputs:
     KafkaConnectWorkerSecurityGroupId:
