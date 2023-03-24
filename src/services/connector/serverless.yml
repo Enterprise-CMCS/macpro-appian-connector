@@ -489,9 +489,9 @@ resources:
         Threshold: "75"
         ComparisonOperator: "GreaterThanOrEqualToThreshold"
         AlarmActions:
-          - ${alerts.ECSFailureTopicArn}
+          - ${param:ecsFailureTopicArn}
         OKActions:
-          - ${alerts.ECSFailureTopicArn}
+          - $${param:ecsFailureTopicArn}
     KafkaConnectServiceECSMemoryAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:
@@ -517,9 +517,9 @@ resources:
         Threshold: "75"
         ComparisonOperator: "GreaterThanOrEqualToThreshold"
         AlarmActions:
-          - ${alerts.ECSFailureTopicArn}
+          - ${param:ecsFailureTopicArn}
         OKActions:
-          - ${alerts.ECSFailureTopicArn}
+          - ${param:ecsFailureTopicArn}
 
   Outputs:
     KafkaConnectWorkerSecurityGroupId:
