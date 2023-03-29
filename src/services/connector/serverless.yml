@@ -72,6 +72,9 @@ custom:
         for task in "${runningTasks[@]}"
         do
           echo """
+          To forward the connector's Kafka Connect REST API to your localhost:8083, run:
+          ecs-exec-pf -c ${self:service}-${sls:stage}-connect -t ${task##*/} -p 8083 -l 8083
+
           To conect to the connector, run:
           aws --region ${self:provider.region} ecs execute-command --cluster ${self:service}-${sls:stage}-connect --task ${task##*/} --container connect --interactive --command "/bin/sh"
 
@@ -245,18 +248,25 @@ resources:
             Image: ${self:custom.connectImage}
             Memory: 4096
             Cpu: 2048
+            User: "root"
             Command:
               - bash
               - "-c"
               - |
-                export CONNECT_REST_HOST_NAME=`curl $ECS_CONTAINER_METADATA_URI_V4 | sed -e 's/.*IPv4Addresses":\["\(.*\)"\],"AttachmentIndex.*/\1/'` &&
-                export CONNECT_REST_ADVERTISED_HOST_NAME=$CONNECT_REST_HOST_NAME &&
-                echo "export SELF=$CONNECT_REST_HOST_NAME" >> ~/.bashrc &&
-                curl -O http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz &&
-                tar -xzvf confluent-hub-client-latest.tar.gz &&
-                confluent-hub install confluentinc/kafka-connect-jdbc:10.5.1 --no-prompt &&
-                curl -L -o /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/ojdbc10.jar  https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc10.jar &&
-                /etc/confluent/docker/run
+                export ENI_IP=`curl $ECS_CONTAINER_METADATA_URI_V4 | sed -e 's/.*IPv4Addresses":\["\(.*\)"\],"AttachmentIndex.*/\1/'` &&
+                echo "$ENI_IP localhost" > /etc/hosts &&
+                echo "export ENI_IP=$ENI_IP" >> /home/appuser/.bashrc
+                runuser -p appuser -c '''
+                  export HOME=/home/appuser &&
+                  source /home/appuser/.bashrc
+                  export CONNECT_REST_HOST_NAME=$ENI_IP &&
+                  export CONNECT_REST_ADVERTISED_HOST_NAME=$ENI_IP &&
+                  curl -O http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz &&
+                  tar -xzvf confluent-hub-client-latest.tar.gz &&
+                  confluent-hub install confluentinc/kafka-connect-jdbc:10.5.1 --no-prompt &&
+                  curl -L -o /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/ojdbc10.jar  https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc10.jar &&
+                  /etc/confluent/docker/run
+                '''
             Environment:
               - Name: CONNECT_BOOTSTRAP_SERVERS
                 Value: >-
