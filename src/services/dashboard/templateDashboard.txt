@@ -37,7 +37,7 @@
                 "background": "transparent"
             }
         },
- {
+        {
             "height": 8,
             "width": 8,
             "y": 4,
@@ -117,7 +117,7 @@
             }
         },
 
-         {
+        {
             "height": 5,
             "width": 24,
             "y": 21,
@@ -131,6 +131,7 @@
                 "view": "table"
             }
         },
+
         {
             "height": 8,
             "width": 6,
@@ -175,6 +176,6 @@
                 "region": "${env:REGION_A}",
                 "title": "ConfigureConnectors Lambda"
             }
-        },
+        }
     ]
 }
