@@ -141,8 +141,6 @@
             "properties": {
                 "title": "Connector Alarms",
                 "alarms": [
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-JdbcTaskAlarm",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-JdbcConnectorAlarm",
                     "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-ConnectorLogsErrorCount",
                     "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-KafkaConnectService-CPUUtilization",
                     "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-KafkaConnectService-MemoryUtilization",
