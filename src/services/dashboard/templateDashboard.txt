@@ -38,11 +38,11 @@
             }
         },
         {
-            "type": "metric",
-            "x": 0,
-            "y": 4,
-            "width": 8,
             "height": 8,
+            "width": 8,
+            "y": 4,
+            "x": 0,
+            "type": "metric",
             "properties": {
                 "metrics": [
                     [
@@ -58,6 +58,121 @@
                 "title": "SNS Topic",
                 "period": 60,
                 "stat": "Sum"
+            }
+        },
+        {
+            "height": 1,
+            "width": 24,
+            "y": 12,
+            "x": 0,
+            "type": "text",
+            "properties": {
+                "markdown": "## connector service",
+                "background": "transparent"
+            }
+        },
+        {
+            "height": 8,
+            "width": 8,
+            "y": 13,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [
+                        "AWS/ECS",
+                        "CPUUtilization",
+                        "ServiceName",
+                        "kafka-connect",
+                        "ClusterName",
+                        "appian-connector-${sls:stage}-connect",
+                        {
+                            "color": "#ff7f0e"
+                        }
+                    ],
+                    [
+                        ".",
+                        "MemoryUtilization",
+                        ".",
+                        ".",
+                        ".",
+                        ".",
+                        {
+                            "color": "#1f77b4"
+                        }
+                    ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${env:REGION_A}",
+                "period": 300,
+                "yAxis": {
+                    "left": {
+                        "max": 100,
+                        "min": 0
+                    }
+                },
+                "title": "Connector CPU and Memory Utilization",
+                "stat": "Average"
+            }
+        },
+
+        {
+            "height": 5,
+            "width": 24,
+            "y": 21,
+            "x": 0,
+            "type": "log",
+            "properties": {
+                "query": "SOURCE '/aws/fargate/appian-connector-${sls:stage}-kafka-connect' | fields @timestamp, @message\n| sort @timestamp desc\n| limit 20",
+                "region": "${env:REGION_A}",
+                "stacked": false,
+                "title": "Connector ECS Logs: /aws/fargate/appian-connector-${sls:stage}-kafka-connect",
+                "view": "table"
+            }
+        },
+
+        {
+            "height": 8,
+            "width": 6,
+            "y": 13,
+            "x": 16,
+            "type": "alarm",
+            "properties": {
+                "title": "Connector Alarms",
+                "alarms": [
+                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-ConnectorLogsErrorCount",
+                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-KafkaConnectService-CPUUtilization",
+                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-KafkaConnectService-MemoryUtilization",
+                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-ConnectorLogsWarnCount"
+                ]
+            }
+        },
+        {
+            "height": 8,
+            "width": 8,
+            "y": 13,
+            "x": 8,
+            "type": "metric",
+            "properties": {
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                    [
+                        "AWS/Lambda",
+                        "Invocations",
+                        "FunctionName",
+                        "appian-connector-${sls:stage}-configureConnectors"
+                    ],
+                    [
+                        ".",
+                        "Errors",
+                        ".",
+                        "."
+                    ]
+                ],
+                "region": "${env:REGION_A}",
+                "title": "ConfigureConnectors Lambda"
             }
         }
     ]

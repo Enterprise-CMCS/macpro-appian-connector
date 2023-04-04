@@ -29,7 +29,7 @@ No matter what task or container to which you're trying to connect, the command 
 - Completed all [onboarding]({{ site.baseurl }}{% link docs/onboarding/onboarding.md %})
 
 #### Procedure
-- [Obtain and set AWS CLI credentials]({{ site.baseurl }}{%link docs/development-workflows/aws-auth.md %})
+- [Obtain and set AWS CLI credentials]({{ site.baseurl }}{%link docs/developer-guide/aws-auth.md %})
 - Determine the stage to which you wish to connect.  This could be master, or it could be a development stage, such as 'mystage'.
 - Determine the service that deploys the container to which you want to connect.  Since this repository only has one container that's deployed, this question's answer is simple:  you want to connect to the 'connector' service.
 - Use the run script's top level 'connect' command to obtain the connection string:
