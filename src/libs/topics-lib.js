@@ -110,7 +110,6 @@ export async function deleteTopics(brokerString, topicList) {
 
   const brokers = brokerString.split(",");
 
-
   const kafka = new Kafka({
     clientId: "cleanupKafka",
     clientId: "admin",
