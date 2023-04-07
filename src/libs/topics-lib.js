@@ -13,16 +13,7 @@ export async function createTopics(brokerString, topicsConfig) {
     clientId: "createTopics",
     brokers: brokers,
     ssl: true,
-    sasl: await getMechanism({
-      region: "us-east-1",
-      credentials: {
-        authorizationIdentity:
-          crossAccountRoleData.AssumedRoleUser.AssumeRoleId,
-        accessKeyId: crossAccountRoleData.Credentials.AccessKeyId,
-        secretAccessKey: crossAccountRoleData.Credentials.SecretAccessKey,
-        sessionToken: crossAccountRoleData.Credentials.SessionToken,
-      },
-    }),
+    sasl: await getMechanism("us-east-1", process.env.bigmacRoleArn),
   });
   var admin = kafka.admin();
 
