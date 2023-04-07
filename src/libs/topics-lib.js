@@ -1,14 +1,38 @@
 const _ = require("lodash");
-import { Kafka, ResourceTypes } from "kafkajs";
+import { Kafka, ConfigResourceTypes } from "kafkajs";
+const {
+  createMechanism,
+} = require("@jm18457/kafkajs-msk-iam-authentication-mechanism");
+const { STSClient, AssumeRoleCommand } = require("@aws-sdk/client-sts");
 
 export async function createTopics(brokerString, topicsConfig) {
   const topics = topicsConfig;
   const brokers = brokerString.split(",");
 
+  const sts = new STSClient({
+    region: "us-east-1",
+  });
+  const crossAccountRoleData = await sts.send(
+    new AssumeRoleCommand({
+      RoleArn: process.env.bigmacRoleArn,
+      RoleSessionName: "LambdaSession",
+      ExternalId: "asdf",
+    })
+  );
   const kafka = new Kafka({
-    clientId: "admin",
+    clientId: "createTopics",
     brokers: brokers,
     ssl: true,
+    sasl: createMechanism({
+      region: "us-east-1",
+      credentials: {
+        authorizationIdentity:
+          crossAccountRoleData.AssumedRoleUser.AssumeRoleId,
+        accessKeyId: crossAccountRoleData.Credentials.AccessKeyId,
+        secretAccessKey: crossAccountRoleData.Credentials.SecretAccessKey,
+        sessionToken: crossAccountRoleData.Credentials.SessionToken,
+      },
+    }),
   });
   var admin = kafka.admin();
 
@@ -61,7 +85,7 @@ export async function createTopics(brokerString, topicsConfig) {
     const configOptions = _.map(topicsMetadata, function (topic) {
       return {
         name: _.get(topic, "name"),
-        type: _.get(ResourceTypes, "TOPIC"),
+        type: _.get(ConfigResourceTypes, "TOPIC"),
       };
     });
 
@@ -105,10 +129,31 @@ export async function deleteTopics(brokerString, topicList) {
 
   const brokers = brokerString.split(",");
 
+  const sts = new STSClient({
+    region: "us-east-1",
+  });
+  const crossAccountRoleData = await sts.send(
+    new AssumeRoleCommand({
+      RoleArn: process.env.bigmacRoleArn,
+      RoleSessionName: "LambdaSession",
+      ExternalId: "asdf",
+    })
+  );
   const kafka = new Kafka({
+    clientId: "cleanupKafka",
     clientId: "admin",
     brokers: brokers,
     ssl: true,
+    sasl: createMechanism({
+      region: "us-east-1",
+      credentials: {
+        authorizationIdentity:
+          crossAccountRoleData.AssumedRoleUser.AssumeRoleId,
+        accessKeyId: crossAccountRoleData.Credentials.AccessKeyId,
+        secretAccessKey: crossAccountRoleData.Credentials.SecretAccessKey,
+        sessionToken: crossAccountRoleData.Credentials.SessionToken,
+      },
+    }),
     requestTimeout: 295000, // 5s short of the lambda function's timeout
   });
   var admin = kafka.admin();

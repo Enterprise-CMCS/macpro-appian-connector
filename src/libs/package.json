@@ -3,7 +3,8 @@
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "^3.165.0",
     "@aws-sdk/client-ecs": "^3.165.0",
-    "kafkajs": "^1.15.0",
+    "@jm18457/kafkajs-msk-iam-authentication-mechanism": "^3.1.1",
+    "kafkajs": "^2.2.4",
     "lodash": "^4.17.21"
   }
 }
