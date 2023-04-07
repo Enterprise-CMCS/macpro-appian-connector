@@ -9,21 +9,11 @@ export async function createTopics(brokerString, topicsConfig) {
   const topics = topicsConfig;
   const brokers = brokerString.split(",");
 
-  const sts = new STSClient({
-    region: "us-east-1",
-  });
-  const crossAccountRoleData = await sts.send(
-    new AssumeRoleCommand({
-      RoleArn: process.env.bigmacRoleArn,
-      RoleSessionName: "LambdaSession",
-      ExternalId: "asdf",
-    })
-  );
   const kafka = new Kafka({
     clientId: "createTopics",
     brokers: brokers,
     ssl: true,
-    sasl: createMechanism({
+    sasl: await getMechanism({
       region: "us-east-1",
       credentials: {
         authorizationIdentity:
