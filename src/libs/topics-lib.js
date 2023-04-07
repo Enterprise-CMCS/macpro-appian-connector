@@ -112,7 +112,6 @@ export async function deleteTopics(brokerString, topicList) {
 
   const kafka = new Kafka({
     clientId: "cleanupKafka",
-    clientId: "admin",
     brokers: brokers,
     ssl: true,
     sasl: await getMechanism("us-east-1", process.env.bigmacRoleArn),
