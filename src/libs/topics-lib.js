@@ -137,26 +137,26 @@ export async function deleteTopics(brokerString, topicList) {
   });
 
   await admin.disconnect();
+}
 
-  async function getMechanism(region, role) {
-    const sts = new STSClient({
-      region,
-    });
-    const crossAccountRoleData = await sts.send(
-      new AssumeRoleCommand({
-        RoleArn: role,
-        RoleSessionName: "LambdaSession",
-        ExternalId: "asdf",
-      })
-    );
-    return createMechanism({
-      region,
-      credentials: {
-        authorizationIdentity: crossAccountRoleData.AssumedRoleUser.AssumeRoleId,
-        accessKeyId: crossAccountRoleData.Credentials.AccessKeyId,
-        secretAccessKey: crossAccountRoleData.Credentials.SecretAccessKey,
-        sessionToken: crossAccountRoleData.Credentials.SessionToken,
-      },
-    });
-  }
+async function getMechanism(region, role) {
+  const sts = new STSClient({
+    region,
+  });
+  const crossAccountRoleData = await sts.send(
+    new AssumeRoleCommand({
+      RoleArn: role,
+      RoleSessionName: "LambdaSession",
+      ExternalId: "asdf",
+    })
+  );
+  return createMechanism({
+    region,
+    credentials: {
+      authorizationIdentity: crossAccountRoleData.AssumedRoleUser.AssumeRoleId,
+      accessKeyId: crossAccountRoleData.Credentials.AccessKeyId,
+      secretAccessKey: crossAccountRoleData.Credentials.SecretAccessKey,
+      sessionToken: crossAccountRoleData.Credentials.SessionToken,
+    },
+  });
 }
