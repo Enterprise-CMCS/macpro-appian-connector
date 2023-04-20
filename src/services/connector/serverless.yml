@@ -261,7 +261,7 @@ resources:
                   source /home/appuser/.bashrc
                   export CONNECT_REST_HOST_NAME=$ENI_IP &&
                   export CONNECT_REST_ADVERTISED_HOST_NAME=$ENI_IP &&
-                  curl -O http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz &&
+                  curl -L -O http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz &&
                   tar -xzvf confluent-hub-client-latest.tar.gz &&
                   confluent-hub install confluentinc/kafka-connect-jdbc:10.5.1 --no-prompt &&
                   curl -L -o /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/ojdbc10.jar  https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc10.jar &&
