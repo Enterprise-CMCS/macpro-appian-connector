@@ -1,10 +1,10 @@
 {
     "widgets": [
         {
-            "height": 2,
-            "width": 5,
+            "height": 3,
+            "width": 6,
             "y": 0,
-            "x": 3,
+            "x": 6,
             "type": "custom",
             "properties": {
                 "endpoint": "arn:aws:lambda:${env:REGION_A}:${aws:accountId}:function:${self:service}-${sls:stage}-createDashboardTemplateWidget",
@@ -16,178 +16,163 @@
             }
         },
         {
+            "height": 1,
+            "width": 24,
+            "y": 3,
+            "x": 0,
+            "type": "text",
+            "properties": {
+                "markdown": "## alerts service",
+                "background": "transparent"
+            }
+        },
+        {
+            "height": 3,
+            "width": 6,
+            "y": 0,
+            "x": 0,
+            "type": "text",
+            "properties": {
+                "markdown": "### Made changes, ready to export?\nUse the widget to the right to execute the templatizer lambda, which will export your current, saved dashboard into a format ready for check in.",
+                "background": "transparent"
+            }
+        },
+        {
+            "height": 8,
+            "width": 8,
+            "y": 4,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [
+                        "AWS/SNS",
+                        "NumberOfMessagesPublished",
+                        "TopicName",
+                        "Alerts-base-alerts-${sls:stage}"
+                    ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${env:REGION_A}",
+                "title": "SNS Topic",
+                "period": 60,
+                "stat": "Sum"
+            }
+        },
+        {
+            "height": 1,
+            "width": 24,
+            "y": 12,
+            "x": 0,
+            "type": "text",
+            "properties": {
+                "markdown": "## connector service",
+                "background": "transparent"
+            }
+        },
+        {
+            "height": 8,
+            "width": 8,
+            "y": 13,
+            "x": 0,
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [
+                        "AWS/ECS",
+                        "CPUUtilization",
+                        "ServiceName",
+                        "kafka-connect",
+                        "ClusterName",
+                        "appian-connector-${sls:stage}-connect",
+                        {
+                            "color": "#ff7f0e"
+                        }
+                    ],
+                    [
+                        ".",
+                        "MemoryUtilization",
+                        ".",
+                        ".",
+                        ".",
+                        ".",
+                        {
+                            "color": "#1f77b4"
+                        }
+                    ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "${env:REGION_A}",
+                "period": 300,
+                "yAxis": {
+                    "left": {
+                        "max": 100,
+                        "min": 0
+                    }
+                },
+                "title": "Connector CPU and Memory Utilization",
+                "stat": "Average"
+            }
+        },
+
+        {
             "height": 5,
-            "width": 18,
-            "y": 2,
-            "x": 3,
+            "width": 24,
+            "y": 21,
+            "x": 0,
+            "type": "log",
+            "properties": {
+                "query": "SOURCE '/aws/fargate/appian-connector-${sls:stage}-kafka-connect' | fields @timestamp, @message\n| sort @timestamp desc\n| limit 20",
+                "region": "${env:REGION_A}",
+                "stacked": false,
+                "title": "Connector ECS Logs: /aws/fargate/appian-connector-${sls:stage}-kafka-connect",
+                "view": "table"
+            }
+        },
+
+        {
+            "height": 8,
+            "width": 6,
+            "y": 13,
+            "x": 16,
             "type": "alarm",
             "properties": {
-                "title": "Alarms",
+                "title": "Connector Alarms",
                 "alarms": [
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-MSKLogsErrorCount",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-PartitionCountTooLow-2",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-PartitionCountTooLow-1",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-PartitionCountTooHigh-2",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-PartitionCountTooLow-3",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-UnderMinIsrPartitionCount-2",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-UnderMinIsrPartitionCount-3",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-PartitionCountTooHigh-1",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-UnderMinIsrPartitionCount-1",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-PartitionCountTooHigh-3",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-CpuUsage-2",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-CpuUsage-3",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-CpuUsage-1",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-RootDiskUsed-2",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-RootDiskUsed-1",
-                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:bigmac-${sls:stage}-RootDiskUsed-3"
+                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-ConnectorLogsErrorCount",
+                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-KafkaConnectService-CPUUtilization",
+                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-KafkaConnectService-MemoryUtilization",
+                    "arn:aws:cloudwatch:${env:REGION_A}:${aws:accountId}:alarm:appian-connector-${sls:stage}-ConnectorLogsWarnCount"
                 ]
             }
         },
         {
-            "height": 6,
-            "width": 6,
-            "y": 7,
-            "x": 3,
-            "type": "metric",
-            "properties": {
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [
-                    [
-                        "AWS/Kafka",
-                        "UnderMinIsrPartitionCount",
-                        "Cluster Name",
-                        "${sls:stage}-msk",
-                        "Broker ID",
-                        "1"
-                    ],
-                    [
-                        "...",
-                        "2"
-                    ],
-                    [
-                        "...",
-                        "3"
-                    ]
-                ],
-                "region": "${env:REGION_A}"
-            }
-        },
-        {
-            "height": 6,
-            "width": 6,
-            "y": 7,
-            "x": 9,
-            "type": "metric",
-            "properties": {
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [
-                    [
-                        "AWS/Kafka",
-                        "CpuUser",
-                        "Cluster Name",
-                        "${sls:stage}-msk",
-                        "Broker ID",
-                        "1"
-                    ],
-                    [
-                        "...",
-                        "2"
-                    ],
-                    [
-                        "...",
-                        "3"
-                    ]
-                ],
-                "region": "${env:REGION_A}"
-            }
-        },
-        {
-            "height": 6,
-            "width": 6,
-            "y": 7,
-            "x": 15,
-            "type": "metric",
-            "properties": {
-                "view": "timeSeries",
-                "stacked": false,
-                "metrics": [
-                    [
-                        "AWS/Kafka",
-                        "RootDiskUsed",
-                        "Cluster Name",
-                        "${sls:stage}-msk",
-                        "Broker ID",
-                        "1"
-                    ],
-                    [
-                        "...",
-                        "2"
-                    ],
-                    [
-                        "...",
-                        "3"
-                    ]
-                ],
-                "region": "${env:REGION_A}"
-            }
-        },
-        {
-            "height": 6,
-            "width": 18,
+            "height": 8,
+            "width": 8,
             "y": 13,
-            "x": 3,
+            "x": 8,
             "type": "metric",
             "properties": {
+                "view": "timeSeries",
+                "stacked": false,
                 "metrics": [
                     [
-                        "AWS/Kafka",
-                        "PartitionCount",
-                        "Cluster Name",
-                        "${sls:stage}-msk",
-                        "Broker ID",
-                        "1",
-                        {
-                            "color": "#d62728"
-                        }
+                        "AWS/Lambda",
+                        "Invocations",
+                        "FunctionName",
+                        "appian-connector-${sls:stage}-configureConnectors"
                     ],
                     [
-                        "...",
-                        "2",
-                        {
-                            "color": "#2ca02c"
-                        }
-                    ],
-                    [
-                        "...",
-                        "3"
+                        ".",
+                        "Errors",
+                        ".",
+                        "."
                     ]
                 ],
-                "view": "gauge",
                 "region": "${env:REGION_A}",
-                "yAxis": {
-                    "left": {
-                        "min": 0,
-                        "max": 2000
-                    }
-                },
-                "stat": "Average",
-                "period": 300,
-                "title": "Partition Count"
-            }
-        },
-        {
-            "height": 5,
-            "width": 18,
-            "y": 19,
-            "x": 3,
-            "type": "log",
-            "properties": {
-                "query": "SOURCE '/aws/fargate/bigmac-logs-${sls:stage}-kafka-connect' | fields @timestamp, @message\n| sort @timestamp desc\n| limit 20",
-                "region": "${env:REGION_A}",
-                "stacked": false,
-                "view": "table"
+                "title": "ConfigureConnectors Lambda"
             }
         }
     ]

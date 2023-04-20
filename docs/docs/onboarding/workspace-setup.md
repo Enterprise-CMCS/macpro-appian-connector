@@ -34,6 +34,7 @@ This is a static list of tools that should be pre-installed to support all Devel
 | [AWS CLI Sessions Manager Plugin][ssmpluginlink]                                  | 1.2.312.0 | Yes      |
 | [jq](https://stedolan.github.io/jq/)                                              | jq-1.6    | Yes      |
 | [awslogs](https://github.com/jorgebastida/awslogs)                                | 1.2.312.0 | Optional |
+| [ecs-exec-pf](https://github.com/winebarrel/ecs-exec-pf)                          | latest    | Yes      |
 | [Git](https://git-scm.com/)                                                       | 2.x       | Yes      |
 
 [ssmpluginlink]: https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html

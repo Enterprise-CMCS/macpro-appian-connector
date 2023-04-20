@@ -16,7 +16,7 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   region: ${env:REGION_A}
   stackTags:
     PROJECT: ${self:custom.project}
@@ -72,6 +72,9 @@ custom:
         for task in "${runningTasks[@]}"
         do
           echo """
+          To forward the connector's Kafka Connect REST API to your localhost:8083, run:
+          ecs-exec-pf -c ${self:service}-${sls:stage}-connect -t ${task##*/} -p 8083 -l 8083
+
           To conect to the connector, run:
           aws --region ${self:provider.region} ecs execute-command --cluster ${self:service}-${sls:stage}-connect --task ${task##*/} --container connect --interactive --command "/bin/sh"
 
@@ -91,6 +94,22 @@ params:
     topicNamespace: --${self:custom.project}--${sls:stage}--
 
 functions:
+  createTopics:
+    handler: handlers/createTopics.handler
+    vpc:
+      securityGroupIds:
+        - Ref: LambdaSecurityGroup
+      subnetIds: >-
+        ${self:custom.vpc.privateSubnets}
+    timeout: 300
+  cleanupKafka:
+    handler: handlers/cleanupKafka.handler
+    vpc:
+      securityGroupIds:
+        - Ref: LambdaSecurityGroup
+      subnetIds: >-
+        ${self:custom.vpc.privateSubnets}
+    timeout: 300
   configureConnectors:
     handler: handlers/configureConnectors.handler
     environment:
@@ -126,7 +145,40 @@ functions:
         ${self:custom.vpc.privateSubnets}
 
 resources:
+  Conditions:
+    isDev:
+      Fn::Not:
+        - Fn::Equals:
+            - ${param:topicNamespace}
+            - ""
   Resources:
+    CreateTopics:
+      Type: AWS::CloudFormation::CustomResource
+      Properties:
+        ServiceToken: !GetAtt CreateTopicsLambdaFunction.Arn
+        BrokerString: ${self:custom.brokerString}
+        TopicsToCreate:
+          - name: ${param:topicNamespace}aws.appian.cmcs.MCP_SPA_PCKG
+    CleanupTopics:
+      Type: AWS::CloudFormation::CustomResource
+      Condition: isDev # We only clean up topics in lower environments where isDev is true
+      Properties:
+        ServiceToken: !GetAtt CleanupKafkaLambdaFunction.Arn
+        BrokerString: ${self:custom.brokerString}
+        TopicPatternsToDelete:
+          - ${param:topicNamespace}aws.appian.cmcs*
+          - ${param:topicNamespace}mgmt.connect.${self:service}*
+    LambdaSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Security Group for the topics lambda function
+        VpcId: ${self:custom.vpc.id}
+    LambdaSecurityGroupEgress:
+      Type: AWS::EC2::SecurityGroupEgress
+      Properties:
+        GroupId: !Ref LambdaSecurityGroup
+        IpProtocol: -1
+        CidrIp: 0.0.0.0/0
     KafkaConnectWorkerLogGroup:
       Type: "AWS::Logs::LogGroup"
       Properties:
@@ -136,6 +188,12 @@ resources:
       Properties:
         GroupDescription: Security Group for the Fargate Connect Workers.
         VpcId: ${self:custom.vpc.id}
+    KafkaConnectWorkerSecurityGroupEgressLambda:
+      Type: AWS::EC2::SecurityGroupEgress
+      Properties:
+        GroupId: !Ref KafkaConnectWorkerSecurityGroup
+        IpProtocol: -1
+        CidrIp: 0.0.0.0/0
     KafkaConnectWorkerSecurityGroupIngressLambda:
       Type: AWS::EC2::SecurityGroupIngress
       Properties:
@@ -190,18 +248,25 @@ resources:
             Image: ${self:custom.connectImage}
             Memory: 4096
             Cpu: 2048
+            User: "root"
             Command:
               - bash
               - "-c"
               - |
-                export CONNECT_REST_HOST_NAME=`curl $ECS_CONTAINER_METADATA_URI_V4 | sed -e 's/.*IPv4Addresses":\["\(.*\)"\],"AttachmentIndex.*/\1/'` &&
-                export CONNECT_REST_ADVERTISED_HOST_NAME=$CONNECT_REST_HOST_NAME &&
-                echo "export SELF=$CONNECT_REST_HOST_NAME" >> ~/.bashrc &&
-                curl -O http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz &&
-                tar -xzvf confluent-hub-client-latest.tar.gz &&
-                confluent-hub install confluentinc/kafka-connect-jdbc:10.5.1 --no-prompt &&
-                curl -L -o /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/ojdbc10.jar  https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc10.jar &&
-                /etc/confluent/docker/run
+                export ENI_IP=`curl $ECS_CONTAINER_METADATA_URI_V4 | sed -e 's/.*IPv4Addresses":\["\(.*\)"\],"AttachmentIndex.*/\1/'` &&
+                echo "$ENI_IP localhost" > /etc/hosts &&
+                echo "export ENI_IP=$ENI_IP" >> /home/appuser/.bashrc
+                runuser -p appuser -c '''
+                  export HOME=/home/appuser &&
+                  source /home/appuser/.bashrc
+                  export CONNECT_REST_HOST_NAME=$ENI_IP &&
+                  export CONNECT_REST_ADVERTISED_HOST_NAME=$ENI_IP &&
+                  curl -L -O http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz &&
+                  tar -xzvf confluent-hub-client-latest.tar.gz &&
+                  confluent-hub install confluentinc/kafka-connect-jdbc:10.5.1 --no-prompt &&
+                  curl -L -o /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/ojdbc10.jar  https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc10.jar &&
+                  /etc/confluent/docker/run
+                '''
             Environment:
               - Name: CONNECT_BOOTSTRAP_SERVERS
                 Value: >-
@@ -265,6 +330,13 @@ resources:
           - FARGATE
         Memory: 4GB
         Cpu: 2048
+        Tags:
+          - Key: ConditionalDependencyHack # Ensures order based on a conditioanl resource
+            Value:
+              Fn::If:
+                - isDev
+                - !Ref CleanupTopics
+                - Blank
     KafkaConnectCluster:
       Type: "AWS::ECS::Cluster"
       Properties:
@@ -354,6 +426,12 @@ resources:
       Properties:
         GroupDescription: Security Group for configuring the connector.
         VpcId: ${self:custom.vpc.id}
+    LambdaConfigureConnectorsSecurityGroupEgress:
+      Type: AWS::EC2::SecurityGroupEgress
+      Properties:
+        GroupId: !Ref LambdaConfigureConnectorsSecurityGroup
+        IpProtocol: -1
+        CidrIp: 0.0.0.0/0
     ConnectorLogsErrorCount:
       Type: AWS::Logs::MetricFilter
       Properties:
@@ -408,6 +486,48 @@ resources:
         MetricName: ConnectorLogsWarnCount
         Namespace: ${self:service}-${sls:stage}/Connector/WARNS
         Statistic: Sum
+    KafkaConnectServiceECSCpuAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: ${self:service}-${sls:stage}-KafkaConnectService-CPUUtilization
+        AlarmDescription: Trigger an alarm when the CPU utilization reaches 75%
+        Namespace: AWS/ECS
+        MetricName: CPUUtilization
+        Dimensions:
+          - Name: ClusterName
+            Value: !Ref KafkaConnectCluster
+          - Name: ServiceName
+            Value: !GetAtt KafkaConnectService.Name
+        Statistic: Average
+        Period: 60
+        EvaluationPeriods: 2
+        Threshold: 75
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        AlarmActions:
+          - ${param:ecsFailureTopicArn}
+        OKActions:
+          - $${param:ecsFailureTopicArn}
+    KafkaConnectServiceECSMemoryAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: ${self:service}-${sls:stage}-KafkaConnectService-MemoryUtilization
+        AlarmDescription: Trigger an alarm when the Memory utilization reaches 75%
+        Namespace: AWS/ECS
+        MetricName: MemoryUtilization
+        Dimensions:
+          - Name: ClusterName
+            Value: !Ref KafkaConnectCluster
+          - Name: ServiceName
+            Value: !GetAtt KafkaConnectService.Name
+        Statistic: Average
+        Period: 60
+        EvaluationPeriods: 2
+        Threshold: 75
+        ComparisonOperator: GreaterThanOrEqualToThreshold
+        AlarmActions:
+          - ${param:ecsFailureTopicArn}
+        OKActions:
+          - ${param:ecsFailureTopicArn}
 
   Outputs:
     KafkaConnectWorkerSecurityGroupId:
