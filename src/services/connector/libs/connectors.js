@@ -15,7 +15,7 @@ export const connectors = [
       query: queryString,
       mode: "timestamp+incrementing",
       "incrementing.column.name": "PCKG_ID",
-      "timestamp.column.name": "UPDT_TS",
+      "timestamp.column.name": "REPLICA_TIMESTAMP",
       "validate.non.null": false,
       "numeric.mapping": "best_fit",
       "key.converter": "org.apache.kafka.connect.json.JsonConverter",
