@@ -262,8 +262,7 @@ resources:
                   source /home/appuser/.bashrc
                   export CONNECT_REST_HOST_NAME=$ENI_IP &&
                   export CONNECT_REST_ADVERTISED_HOST_NAME=$ENI_IP &&
-                  curl -k -SL -o /usr/share/java/cp-base-new/aws-msk-iam-auth-1.1.3-all.jar "https://github.com/aws/aws-msk-iam-auth/releases/download/v1.1.3/aws-msk-iam-auth-1.1.3-all.jar" &&
-                  curl -O http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz &&
+                  curl -L -O http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz &&
                   tar -xzvf confluent-hub-client-latest.tar.gz &&
                   confluent-hub install confluentinc/kafka-connect-jdbc:10.5.1 --no-prompt &&
                   curl -L -o /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/ojdbc10.jar  https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc10.jar &&
@@ -504,7 +503,7 @@ resources:
         ComparisonOperator: GreaterThanOrEqualToThreshold
         EvaluationPeriods: 2
         Period: 300
-        Threshold: 1
+        Threshold: 3
         MetricName: ConnectorLogsWarnCount
         Namespace: ${self:service}-${sls:stage}/Connector/WARNS
         Statistic: Sum
