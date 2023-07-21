@@ -482,7 +482,7 @@ resources:
         ComparisonOperator: GreaterThanOrEqualToThreshold
         EvaluationPeriods: 2
         Period: 300
-        Threshold: 1
+        Threshold: 3
         MetricName: ConnectorLogsWarnCount
         Namespace: ${self:service}-${sls:stage}/Connector/WARNS
         Statistic: Sum
