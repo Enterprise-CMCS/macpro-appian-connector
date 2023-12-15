@@ -341,7 +341,9 @@ resources:
       Type: "AWS::ECS::Cluster"
       Properties:
         ClusterName: ${self:service}-${sls:stage}-connect
-
+        ClusterSettings:
+          - Name: containerInsights
+            Value: enabled
     KafkaConnectService:
       Type: "AWS::ECS::Service"
       Properties:
