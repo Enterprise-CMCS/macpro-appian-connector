@@ -246,8 +246,8 @@ resources:
         ContainerDefinitions:
           - Name: connect
             Image: ${self:custom.connectImage}
-            Memory: 4096
-            Cpu: 2048
+            Memory: 2048
+            Cpu: 256
             User: "root"
             Command:
               - bash
@@ -328,8 +328,8 @@ resources:
         TaskRoleArn: !GetAtt KafkaConnectWorkerRole.Arn
         RequiresCompatibilities:
           - FARGATE
-        Memory: 4GB
-        Cpu: 2048
+        Memory: 2GB
+        Cpu: 256
         Tags:
           - Key: ConditionalDependencyHack # Ensures order based on a conditioanl resource
             Value:
