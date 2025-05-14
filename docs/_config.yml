@@ -1,8 +1,6 @@
 title: Appian Connector
 # baseurl: "/just-the-docs" # the subpath of your site, e.g. /blog
 url: "https://enterprise-cmcs.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
-keep_files: ["docs/metrics/_next"]
-include: ["_next", "_app-*.js", "_buildManifest.js", "_ssgManifest.js"]
 exclude:
   [
     ".jekyll-cache",
