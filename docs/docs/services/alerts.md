@@ -5,14 +5,15 @@ parent: Services
 nav_order: 1
 ---
 
-# alerts
+## alerts
+
 {: .no_toc }
 
-#### Summary
+## Summary
 
 The alerts service deploys a Simple Notification Service (SNS) topic to REGION_A.  This topic can be leveraged by any other service for sending alerts.
 
-#### Notes
+### Notes
 
 - To subscribe an email, phone number, or something else to the topic, find the SNS topic using the AWS Console and add the subscription manually.
 - No SNS subscriptions are made by the deployment process. The topic is created, and several other services are configured to publish notifications to the topic, but the topic itself is not automatically configured to fan out any notifications. Here's why:

@@ -68,7 +68,6 @@ slack:
 
 remote_theme: just-the-docs/just-the-docs
 permalink: pretty
-exclude: [".jekyll-cache", "node_modules/", "*.gemspec", "*.gem", "Gemfile", "Gemfile.lock", "package.json", "package-lock.json",  "script/", "LICENSE.txt", "lib/", "bin/", "README.md", "Rakefile"]
 
 layout: default
 nav_order: 2

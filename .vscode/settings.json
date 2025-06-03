@@ -1,0 +1,11 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.markdownlint": "always"
+  },
+  "markdownlint.config": {
+    "MD022": true,
+    "MD024": false,
+    "MD033": false
+  }
+}
