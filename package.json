@@ -5,14 +5,7 @@
   "version": "0.0.0-managed-by-semantic-release",
   "private": true,
   "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
   "scripts": {
-    "coverage": "vitest run --coverage",
-    "test": "vitest --config ./src/tests/vitest.config.ts",
-    "test-ci": "vitest run --config ./src/tests/vitest.config.ts",
-    "test-gui": "vitest --ui",
     "test-tsc": "tsc --skipLibCheck --noEmit"
   },
   "repository": {
@@ -33,8 +26,6 @@
     "@stratiformdigital/serverless-online": "^3.1.0",
     "@stratiformdigital/serverless-s3-security-helper": "^4.0.0",
     "@stratiformdigital/serverless-stage-destroyer": "^2.0.0",
-    "@vitest/coverage-c8": "^0.29.8",
-    "@vitest/ui": "^0.29.8",
     "aws-sdk-client-mock": "^2.0.1",
     "prettier": "2.7.1",
     "semantic-release": "^19.0.5",
@@ -43,8 +34,7 @@
     "serverless-disable-functions": "^1.0.0",
     "serverless-plugin-scripts": "^1.0.2",
     "serverless-plugin-warmup": "^7.1.0",
-    "serverless-stack-termination-protection": "^2.0.2",
-    "vitest": "^0.29.8"
+    "serverless-stack-termination-protection": "^2.0.2"
   },
   "dependencies": {},
   "release": {
