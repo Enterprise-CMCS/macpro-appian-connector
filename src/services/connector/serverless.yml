@@ -87,28 +87,28 @@ params:
   master: # dev-like environment
     topicNamespace: ""
     taskCpu: "1024"
-    taskMemory: "2048MB"
+    taskMemory: "2048"
     connectContainerCpu: "512"
     connectContainerMemory: "1024"
     instantClientContainerMemory: "512"
   val:
     topicNamespace: ""
     taskCpu: "256"
-    taskMemory: "512MB"
+    taskMemory: "512"
     connectContainerCpu: "128"
     connectContainerMemory: "256"
     instantClientContainerMemory: "128"
   production:
     topicNamespace: ""
     taskCpu: "2048"
-    taskMemory: "6144MB" # Corrected from 4GB to support container reservations
+    taskMemory: "6144" # Corrected from 4GB to support container reservations
     connectContainerCpu: "2048"
     connectContainerMemory: "4096"
     instantClientContainerMemory: "2048"
   default: # Fallback for other stages, or a common dev setting
     topicNamespace: --${self:custom.project}--${sls:stage}--
     taskCpu: "1024"
-    taskMemory: "2048MB"
+    taskMemory: "2048"
     connectContainerCpu: "512"
     connectContainerMemory: "1024"
     instantClientContainerMemory: "512"
