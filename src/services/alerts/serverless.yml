@@ -11,8 +11,8 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs18.x
-  region: ${env:REGION_A}
+  runtime: nodejs22.x
+  region: us-east-1
   stackTags:
     PROJECT: ${self:custom.project}
     SERVICE: ${self:service}
