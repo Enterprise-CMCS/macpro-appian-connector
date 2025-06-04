@@ -27,10 +27,6 @@ Authenticating to an AWS account(s) is a required first step for many workflows.
 
 This procedure will take you to the AWS Console in a web browser, for one of the AWS accounts used by this project.
 
-#### Prerequisites
-
-- Completed all [onboarding]({{ site.baseurl }}{% link docs/onboarding/onboarding.md %})
-
 #### Procedure
 
 To get to the AWS Console:
