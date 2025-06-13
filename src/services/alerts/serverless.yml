@@ -11,8 +11,8 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs18.x
-  region: ${env:REGION_A}
+  runtime: nodejs20.x
+  region: us-east-1
   stackTags:
     PROJECT: ${self:custom.project}
     SERVICE: ${self:service}
@@ -31,19 +31,21 @@ resources:
       Type: "AWS::SNS::Topic"
       Properties:
         TopicName: Alerts-${self:service}-${sls:stage}
-        KmsMasterKeyId: !Ref KmsKeyForSns
+        KmsMasterKeyId:
+          Ref: KmsKeyForSns
 
     KmsKeyForSns:
       Type: AWS::KMS::Key
       Properties:
-        EnableKeyRotation: "true"
+        EnableKeyRotation: true
         KeyPolicy:
           Version: "2012-10-17"
           Statement:
             - Sid: Allow access for Root User
               Effect: Allow
               Principal:
-                AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+                AWS:
+                  Ref: AWS::AccountId
               Action: "kms:*"
               Resource: "*"
             - Sid: Allow access for Key User (SNS Service Principal)
@@ -72,7 +74,7 @@ resources:
                 - "kms:GenerateDataKey*"
               Resource: "*"
 
-    EventBridgeToToSnsPolicy:
+    EventBridgeToSnsPolicy:
       Type: AWS::SNS::TopicPolicy
       Properties:
         PolicyDocument:
@@ -83,11 +85,13 @@ resources:
                   - events.amazonaws.com
                   - cloudwatch.amazonaws.com
               Action: sns:Publish
-              Resource: !Ref AlertsTopic
+              Resource:
+                Ref: AlertsTopic
         Topics:
-          - !Ref AlertsTopic
+          - arn:aws:sns:${self:provider.region}:${aws:accountId}:Alerts-${self:service}-${sls:stage}
 
   Outputs:
     ECSFailureTopicArn:
       Description: ECS Failure SNS topic ARN
-      Value: !Ref AlertsTopic
+      Value:
+        Ref: AlertsTopic

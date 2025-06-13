@@ -1,8 +1,6 @@
 services:
   alerts:
     path: src/services/alerts
-  dashboard:
-    path: src/services/dashboard
   connector:
     path: src/services/connector
     params:

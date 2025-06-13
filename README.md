@@ -8,7 +8,7 @@
     <img alt="Slack" src="https://img.shields.io/badge/Slack-channel-purple.svg">
   </a>
   <a href="https://codeclimate.com/github/Enterprise-CMCS/macpro-appian-connector/maintainability">
-    <img src="https://api.codeclimate.com/v1/badges/f7cce65e43346ac8e2c2/maintainability" />
+    <img alt="Maintainability" src="https://api.codeclimate.com/v1/badges/f7cce65e43346ac8e2c2/maintainability" />
   </a>
   <a href="https://dependabot.com/">
     <img alt="Dependabot" src="https://badgen.net/badge/Dependabot/enabled/green?icon=dependabot">
@@ -23,7 +23,7 @@
 
 ---
 
-### Please visit our [docs site](https://enterprise-cmcs.github.io/macpro-appian-connector/) for complete documentation.
+### Please visit our [docs site](https://enterprise-cmcs.github.io/macpro-appian-connector/) for complete documentation
 
 ---
 
@@ -32,7 +32,7 @@
 A Kafka Connector to stream data changes from Appian to BigMAC.
 
 <p align="center">
-  <img width="55%" src="docs/assets/architecture.png">
+  <img width="55%" src="docs/assets/architecture.png" alt="Architecture diagram">
 </p>
 
 ## Contributing

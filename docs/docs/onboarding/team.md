@@ -5,26 +5,16 @@ parent: Onboarding
 nav_order: 1
 ---
 
-# Team Introduction
+## Team Introduction
+
 {: .no_toc }
 
 ## Table of contents
+
 {: .no_toc .text-delta }
 
 1. TOC
 {:toc}
-
----
-
-### Meet the team
-
-A list of a few important roles and people on the project (not comprehensive!):
-
-| Role | Description | Team Member | Email |
-| ---- | ----------- | ----------- | ----- |
-|{% for element in site.team.members %} {{ element.role }} | {{ element.description }} | {{ element.name }} | {{ element.email }} |
-{% endfor %}
-
 
 ### Core Work Hours
 

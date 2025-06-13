@@ -4,7 +4,7 @@ on: [pull_request]
 
 jobs:
   prettier:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -13,6 +13,6 @@ jobs:
         uses: actions/setup-python@v2
 
       - name: Run pre-commit
-        uses: pre-commit/action@v2.0.2
+        uses: pre-commit/action@v3.0.1
         with:
           extra_args: --all-files
