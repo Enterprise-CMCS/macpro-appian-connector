@@ -15,16 +15,22 @@ The SNS Subscription service associated with the topic is managed manually, this
 You can manually test events sent to EventBridge with the [AWS CLI](https://aws.amazon.com/cli/)
 
 1. First, subscribe your email address to the SNS topic either by creating the service in the console or using the aws cli.
+
    ```bash
    aws sns subscribe --topic-arn ENTER_YOUR_TOPIC_ARN --protocol email --notification-endpoint ENTER_YOUR_EMAIL_ADDRESS
    ```
+
 1. Click the confirmation link delivered to your email to verify the endpoint.
 1. Create a test event to send EventBridge. You will need the cluster arn for the service you would like to test events for. (Seatool, LMDC, etc.) Once you have that, run this script and it will create a test-event for you.
+
    ```bash
    sh create-test-event.sh
    ```
+
 1. Send the event to EventBridge:
+
    ```bash
    aws events put-events --entries file://test-event.json
    ```
+
 1. The event is delivered to your email address.

@@ -6,7 +6,8 @@ description: "The home page."
 permalink: /
 ---
 
-# {{site.title}}
+## {{site.title}}
+
 {: .fs-9 }
 
 {{ site.description }}
@@ -16,7 +17,7 @@ permalink: /
 
 ---
 
-## Welcome!
+## Welcome
 
 The {{ site.repo.name }} project is a Kafka Connector to stream data changes froim Appian to BigMAC. It was created using the [macpro-base-template](https://github.com/Enterprise-CMCS/macpro-base-template) a jumping off point. In addition to the Kafka Connector, this project includes full CI/CD support with GitHub Actions, automated security scanning, infrastructure and application deployment workflows, and documentation hosted in GitHub Pages.
 
@@ -26,8 +27,7 @@ The {{ site.repo.name }} project is a Kafka Connector to stream data changes fro
 
 The {{ site.repo.name }} project is a work of the [Centers for Medicare & Medicaid Services (CMS)](https://www.cms.gov/).
 
-
-#### Thank you to the contributors of {{ site.repo.name }}!
+### Thank you to the contributors of {{ site.repo.name }}
 
 <ul class="list-style-none">
 {% for contributor in site.github.contributors %}

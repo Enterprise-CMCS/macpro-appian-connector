@@ -5,7 +5,8 @@ parent: Onboarding
 nav_order: 2
 ---
 
-# Account Access
+## Account Access
+
 {: .no_toc }
 
 You'll need access to a few systems to be a fully privileged developer.  This section will guide you in making the necessary access requests.  
@@ -13,10 +14,12 @@ You'll need access to a few systems to be a fully privileged developer.  This se
 **Note:  Account access should be your first step in onboarding, as the requests can take time to complete.**
 
 ## Table of contents
+
 {: .no_toc .text-delta }
 
 1. TOC
 {:toc}
+
 ---
 
 ## Git organization

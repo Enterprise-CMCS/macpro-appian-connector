@@ -5,16 +5,20 @@ parent: GitHub Workflows
 nav_order: 1
 ---
 
-# Security Hub Jira Sync
+## Security Hub Jira Sync
+
 {: .no_toc }
 
-Reflect our active Security Hub findings in Jira.
+## Reflect our active Security Hub findings in Jira
+
 {: .fs-6 .fw-300 }
+
 ---
 
 ## Summary
 
 CMS projects deployed in AWS are required to resolve [Security Hub](https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html) findings according to the following schedule:
+
 - Critical vulnerabilities within 15 days from discovery
 - High vulnerabilities within 30 days from discovery
 - Moderate (MEDIUM) vulnerabilities within 90 days from discovery
@@ -25,11 +29,12 @@ The security-hub-jira-sync workflow exists to get Security Hub findings in a pro
 ## Configuration, Notes, YSK
 
 ### Set ENABLE_SECURITY_HUB_SYNC actions variable
-The security hub workflow is unique, in that it should ideally only be run by one project per AWS account.  Since security hub findings are scoped to the account, and since we can have many projects deployed to a given account, multiple instances of the security hub workflow running is not ideal.  It is rather harmless if two projects in the same account were both running the workflow, but it's best avoided. 
+
+The security hub workflow is unique, in that it should ideally only be run by one project per AWS account.  Since security hub findings are scoped to the account, and since we can have many projects deployed to a given account, multiple instances of the security hub workflow running is not ideal.  It is rather harmless if two projects in the same account were both running the workflow, but it's best avoided.
 
 To that end, a new project based off this repo will not run this workflow automatically.  There is an environment variable flag that must be set before the job will run.
 
-To enable the security-hub-jira-sync workflow, set a repository variable named 'ENABLE_SECURITY_HUB_SYNC' to any value.  The existence of the variable is what is checked, not its value.  To set a GitHub actions secret, follow the same steps as creating an Actions secret, but look for a tab that says 'Variables'.  These function just like secrets in their scope, but are unencrypted. 
+To enable the security-hub-jira-sync workflow, set a repository variable named 'ENABLE_SECURITY_HUB_SYNC' to any value.  The existence of the variable is what is checked, not its value.  To set a GitHub actions secret, follow the same steps as creating an Actions secret, but look for a tab that says 'Variables'.  These function just like secrets in their scope, but are unencrypted.
 
 ### Set JIRA_USERNAME and JIRA_TOKEN as github secrets
 
@@ -50,6 +55,7 @@ In any event, you probably want to update the Working Team from Platform Team to
 ### YSK the workflow only runs on the default branch
 
 On MACPro, we typically use three separate levels of AWS accounts for each project:
+
 - dev account:  this holds the default branch (master) enviroment along with all ephemeral branches/environments.
 - impl account:  this holds the val environment built from the val branch.
 - production account:  this holds the production environment built from the production branch.

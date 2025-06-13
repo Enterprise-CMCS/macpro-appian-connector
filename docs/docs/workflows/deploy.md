@@ -5,11 +5,14 @@ parent: GitHub Workflows
 nav_order: 3
 ---
 
-# Deploy
+## Deploy
+
 {: .no_toc }
 
-Deploys the stage
+## Deploys the stage
+
 {: .fs-6 .fw-300 }
+
 ---
 
 ## Summary
@@ -42,34 +45,34 @@ This GitHub workflow deploys an application to AWS and performs various tests an
   - `pull-requests`: write
 - **Jobs:**
   1. **init:**
-    - **Runs on:** Ubuntu 20.04
-    - **Steps:**
-      - Validate the stage name
-  2. **deploy:**
-    - **Runs on:** Ubuntu 20.04
-    - **Needs:** init
-    - **Environment:** `STAGE_NAME`
-    - **Steps:**
-      - Checkout the source code
-      - Use the `aws-actions/configure-aws-credentials` action to configure AWS credentials
-      - Deploy the application using the `run deploy` command
-  3. **test:**
-    - **Runs on:** Ubuntu 20.04
-    - **Needs:** deploy
-    - **Environment:** `STAGE_NAME`
-    - **Steps:**
-      - Checkout the source code
-      - Use the `aws-actions/configure-aws-credentials` action to configure AWS credentials
-      - Run automated tests using the `run test` command
-  4. **cfn-nag:**
-    - **Runs on:** Ubuntu 20.04
-    - **Needs:** deploy
-    - **Environment:** `STAGE_NAME`
-    - **Steps:**
-      - Checkout the source code
-      - Use the `aws-actions/configure-aws-credentials` action to configure AWS credentials
-      - Use the `stelligent/cfn_nag` action to perform a static analysis of the AWS CloudFormation templates
-  5. **resources:**
-    - **Runs on:** Ubuntu 20.04
-    - **Needs:** deploy
-    - **
+  - **Runs on:** Ubuntu 20.04
+  - **Steps:**
+    - Validate the stage name
+  1. **deploy:**
+  - **Runs on:** Ubuntu 20.04
+  - **Needs:** init
+  - **Environment:** `STAGE_NAME`
+  - **Steps:**
+    - Checkout the source code
+    - Use the `aws-actions/configure-aws-credentials` action to configure AWS credentials
+    - Deploy the application using the `run deploy` command
+  1. **test:**
+  - **Runs on:** Ubuntu 20.04
+  - **Needs:** deploy
+  - **Environment:** `STAGE_NAME`
+  - **Steps:**
+    - Checkout the source code
+    - Use the `aws-actions/configure-aws-credentials` action to configure AWS credentials
+    - Run automated tests using the `run test` command
+  1. **cfn-nag:**
+  - **Runs on:** Ubuntu 20.04
+  - **Needs:** deploy
+  - **Environment:** `STAGE_NAME`
+  - **Steps:**
+    - Checkout the source code
+    - Use the `aws-actions/configure-aws-credentials` action to configure AWS credentials
+    - Use the `stelligent/cfn_nag` action to perform a static analysis of the AWS CloudFormation templates
+  1. **resources:**
+  - **Runs on:** Ubuntu 20.04
+  - **Needs:** deploy
+  - **

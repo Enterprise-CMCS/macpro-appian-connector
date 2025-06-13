@@ -20,7 +20,7 @@ jobs:
         inputs.environment != '' &&
         !contains(fromJson('["master", "staging", "production"]'), inputs.environment)
       )
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment || github.event.ref }}
     env:
@@ -56,7 +56,7 @@ jobs:
 
   delete_environment:
     needs: destroy
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: strumwolf/delete-deployment-environment@v2
         with:

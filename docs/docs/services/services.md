@@ -6,7 +6,8 @@ has_children: true
 permalink: docs/services
 ---
 
-# Services
+## Services
+
 {: .no_toc }
 
 Details on each Serverless service

@@ -16,8 +16,8 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs18.x
-  region: ${env:REGION_A}
+  runtime: nodejs20.x
+  region: us-east-1
   stackTags:
     PROJECT: ${self:custom.project}
     SERVICE: ${self:service}
@@ -84,14 +84,34 @@ custom:
         done
 
 params:
-  master:
+  master: # dev-like environment
     topicNamespace: ""
+    taskCpu: "1024"
+    taskMemory: "2048"
+    connectContainerCpu: "512"
+    connectContainerMemory: "1024"
+    instantClientContainerMemory: "512"
   val:
     topicNamespace: ""
+    taskCpu: "256"
+    taskMemory: "512"
+    connectContainerCpu: "128"
+    connectContainerMemory: "256"
+    instantClientContainerMemory: "128"
   production:
     topicNamespace: ""
-  default:
+    taskCpu: "2048"
+    taskMemory: "6144" # Corrected from 4GB to support container reservations
+    connectContainerCpu: "2048"
+    connectContainerMemory: "4096"
+    instantClientContainerMemory: "2048"
+  default: # Fallback for other stages, or a common dev setting
     topicNamespace: --${self:custom.project}--${sls:stage}--
+    taskCpu: "1024"
+    taskMemory: "2048"
+    connectContainerCpu: "512"
+    connectContainerMemory: "1024"
+    instantClientContainerMemory: "512"
 
 functions:
   createTopics:
@@ -246,8 +266,8 @@ resources:
         ContainerDefinitions:
           - Name: connect
             Image: ${self:custom.connectImage}
-            Memory: 4096
-            Cpu: 2048
+            Memory: ${param:connectContainerMemory}
+            Cpu: ${param:connectContainerCpu}
             User: "root"
             Command:
               - bash
@@ -316,7 +336,7 @@ resources:
                 awslogs-datetime-format: \[%Y-%m-%d %H:%M:%S,
           - Name: instantclient
             Image: "ghcr.io/oracle/oraclelinux8-instantclient:21"
-            Memory: 2048 # This will kill the instantclient container if it goes over 2048, to preserve the connector container.
+            Memory: ${param:instantClientContainerMemory} # This will kill the instantclient container if it goes over this, to preserve the connector container.
             Command:
               - bash
               - "-c"
@@ -328,8 +348,8 @@ resources:
         TaskRoleArn: !GetAtt KafkaConnectWorkerRole.Arn
         RequiresCompatibilities:
           - FARGATE
-        Memory: 4GB
-        Cpu: 2048
+        Memory: ${param:taskMemory}
+        Cpu: ${param:taskCpu}
         Tags:
           - Key: ConditionalDependencyHack # Ensures order based on a conditioanl resource
             Value:
