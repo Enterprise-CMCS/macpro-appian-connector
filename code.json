@@ -19,7 +19,7 @@
   "repositoryHost": "github",
   "repositoryVisibility": "",
   "vcs": "git",
-  "laborHours": 4165,
+  "laborHours": 4192,
   "reuseFrequency": {
     "forks": 0,
     "clones": 0
@@ -27,13 +27,17 @@
   "platforms": [],
   "categories": [],
   "softwareType": "",
-  "languages": ["JavaScript", "TypeScript", "Shell"],
+  "languages": [
+    "JavaScript",
+    "TypeScript",
+    "Shell"
+  ],
   "maintenance": "",
   "contractNumber": "",
   "date": {
     "created": "2022-12-12T21:16:45Z",
-    "lastModified": "2025-06-17T17:51:36Z",
-    "metaDataLastUpdated": "2025-06-17T17:58:27.844Z"
+    "lastModified": "2025-06-22T05:47:21Z",
+    "metaDataLastUpdated": "2025-06-22T05:48:15.298Z"
   },
   "tags": [],
   "contact": {
