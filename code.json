@@ -1,0 +1,57 @@
+{
+  "name": "macpro-appian-connector",
+  "description": "MACPro Platform team is working on building a Kafka Connector to stream data changes from Appian to Bigmac.",
+  "longDescription": "",
+  "status": "",
+  "permissions": {
+    "license": [
+      {
+        "name": "",
+        "URL": ""
+      }
+    ],
+    "usageType": "",
+    "exemptionText": ""
+  },
+  "organization": "",
+  "repositoryURL": "https://github.com/Enterprise-CMCS/macpro-appian-connector",
+  "projectURL": "",
+  "repositoryHost": "github",
+  "repositoryVisibility": "",
+  "vcs": "git",
+  "laborHours": 4165,
+  "reuseFrequency": {
+    "forks": 0,
+    "clones": 0
+  },
+  "platforms": [],
+  "categories": [],
+  "softwareType": "",
+  "languages": ["JavaScript", "TypeScript", "Shell"],
+  "maintenance": "",
+  "contractNumber": "",
+  "date": {
+    "created": "2022-12-12T21:16:45Z",
+    "lastModified": "2025-06-17T17:51:36Z",
+    "metaDataLastUpdated": "2025-06-17T17:58:27.844Z"
+  },
+  "tags": [],
+  "contact": {
+    "email": "",
+    "name": ""
+  },
+  "feedbackMechanisms": [
+    "https://github.com/Enterprise-CMCS/macpro-appian-connector/issues"
+  ],
+  "localisation": false,
+  "repositoryType": "",
+  "userInput": false,
+  "fismaLevel": "",
+  "group": "",
+  "projects": [],
+  "systems": [],
+  "upstream": "",
+  "subsetInHealthcare": [],
+  "userType": [],
+  "maturityModelTier": 0
+}
