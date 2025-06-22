@@ -27,11 +27,7 @@
   "platforms": [],
   "categories": [],
   "softwareType": "",
-  "languages": [
-    "JavaScript",
-    "TypeScript",
-    "Shell"
-  ],
+  "languages": ["JavaScript", "TypeScript", "Shell"],
   "maintenance": "",
   "contractNumber": "",
   "date": {
