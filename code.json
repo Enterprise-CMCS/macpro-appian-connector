@@ -1,57 +1,97 @@
 {
   "name": "macpro-appian-connector",
   "description": "MACPro Platform team is working on building a Kafka Connector to stream data changes from Appian to Bigmac.",
-  "longDescription": "",
-  "status": "",
+  "longDescription": "The macpro-appian-connector is a comprehensive Kafka Connector system designed to establish reliable, real-time data streaming between Appian (a legacy Oracle-based system) and BigMAC (a modern CMS system). This cloud-native solution leverages AWS serverless architecture with ECS Fargate for running Kafka Connect workers, Lambda functions for management and orchestration, and CloudWatch for comprehensive monitoring and alerting. The system includes JDBC source connectors for Oracle database connectivity, automated deployment workflows, security scanning, and comprehensive documentation. Built with JavaScript/TypeScript and the Serverless Framework, it provides essential data synchronization capabilities for CMS healthcare operations while ensuring secure handling of sensitive healthcare data with appropriate error handling, retry mechanisms, and audit trails.",
+  "status": "Production",
   "permissions": {
-    "license": [
+    "licenses": [
       {
-        "name": "",
-        "URL": ""
+        "name": "CC0-1.0",
+        "URL": "https://creativecommons.org/publicdomain/zero/1.0/legalcode"
       }
     ],
-    "usageType": "",
+    "usageType": "openSource",
     "exemptionText": ""
   },
-  "organization": "",
+  "organization": "Centers for Medicare & Medicaid Services",
   "repositoryURL": "https://github.com/Enterprise-CMCS/macpro-appian-connector",
-  "projectURL": "",
-  "repositoryHost": "github",
-  "repositoryVisibility": "",
+  "projectURL": "https://enterprise-cmcs.github.io/macpro-appian-connector/",
+  "repositoryHost": "github.com/Enterprise-CMCS",
+  "repositoryVisibility": "public",
   "vcs": "git",
   "laborHours": 4165,
   "reuseFrequency": {
     "forks": 0,
     "clones": 0
   },
-  "platforms": [],
-  "categories": [],
-  "softwareType": "",
-  "languages": ["JavaScript", "TypeScript", "Shell"],
-  "maintenance": "",
-  "contractNumber": "",
+  "platforms": [
+    "web",
+    "linux",
+    "other"
+  ],
+  "categories": [
+    "data-analytics",
+    "data-collection",
+    "it-development"
+  ],
+  "softwareType": "standalone/backend",
+  "languages": [
+    "JavaScript",
+    "TypeScript",
+    "Shell"
+  ],
+  "maintenance": "contract",
+  "contractNumber": "75FCMC24F0027",
   "date": {
     "created": "2022-12-12T21:16:45Z",
     "lastModified": "2025-06-17T17:51:36Z",
     "metaDataLastUpdated": "2025-06-17T17:58:27.844Z"
   },
-  "tags": [],
+  "tags": [
+    "kafka",
+    "data-streaming",
+    "cms",
+    "healthcare",
+    "appian",
+    "bigmac",
+    "oracle",
+    "aws",
+    "serverless"
+  ],
   "contact": {
-    "email": "",
-    "name": ""
+    "email": "bpaige@gswell.com",
+    "name": "Benjamin Paige"
   },
   "feedbackMechanisms": [
     "https://github.com/Enterprise-CMCS/macpro-appian-connector/issues"
   ],
   "localisation": false,
-  "repositoryType": "",
+  "repositoryType": "application",
   "userInput": false,
-  "fismaLevel": "",
-  "group": "",
-  "projects": [],
-  "systems": [],
-  "upstream": "",
-  "subsetInHealthcare": [],
-  "userType": [],
-  "maturityModelTier": 0
+  "fismaLevel": "Moderate",
+  "group": "MACPro Platform",
+  "projects": [
+    "macpro-appian-connector",
+    "BigMAC",
+    "Appian"
+  ],
+  "systems": [
+    "AWS Lambda",
+    "AWS ECS",
+    "Kafka",
+    "Oracle Database",
+    "CloudWatch",
+    "SNS"
+  ],
+  "upstream": "https://github.com/Enterprise-CMCS/macpro-appian-connector/network/dependencies",
+  "subsetInHealthcare": [
+    "Policy",
+    "Operational",
+    "Medicare",
+    "Medicaid"
+  ],
+  "userType": [
+    "Government"
+  ],
+  "maturityModelTier": 3
 }
