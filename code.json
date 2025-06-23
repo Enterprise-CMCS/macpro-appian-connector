@@ -24,22 +24,10 @@
     "forks": 0,
     "clones": 0
   },
-  "platforms": [
-    "web",
-    "linux",
-    "other"
-  ],
-  "categories": [
-    "data-analytics",
-    "data-collection",
-    "it-development"
-  ],
+  "platforms": ["web", "linux", "other"],
+  "categories": ["data-analytics", "data-collection", "it-development"],
   "softwareType": "standalone/backend",
-  "languages": [
-    "JavaScript",
-    "TypeScript",
-    "Shell"
-  ],
+  "languages": ["JavaScript", "TypeScript", "Shell"],
   "maintenance": "contract",
   "contractNumber": "75FCMC24F0027",
   "date": {
@@ -70,11 +58,7 @@
   "userInput": false,
   "fismaLevel": "Moderate",
   "group": "MACPro Platform",
-  "projects": [
-    "macpro-appian-connector",
-    "BigMAC",
-    "Appian"
-  ],
+  "projects": ["macpro-appian-connector", "BigMAC", "Appian"],
   "systems": [
     "AWS Lambda",
     "AWS ECS",
@@ -84,14 +68,7 @@
     "SNS"
   ],
   "upstream": "https://github.com/Enterprise-CMCS/macpro-appian-connector/network/dependencies",
-  "subsetInHealthcare": [
-    "Policy",
-    "Operational",
-    "Medicare",
-    "Medicaid"
-  ],
-  "userType": [
-    "Government"
-  ],
+  "subsetInHealthcare": ["Policy", "Operational", "Medicare", "Medicaid"],
+  "userType": ["Government"],
   "maturityModelTier": 3
 }
