@@ -1,8 +1,9 @@
 {
   "name": "libs",
+  "version": "1.0.0",
   "dependencies": {
-    "@aws-sdk/client-cloudwatch": "^3.165.0",
-    "@aws-sdk/client-ecs": "^3.165.0",
+    "@aws-sdk/client-cloudwatch": "^3.454.0",
+    "@aws-sdk/client-ecs": "^3.864.0",
     "kafkajs": "^1.15.0",
     "lodash": "^4.17.21"
   }
