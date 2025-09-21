@@ -7,6 +7,7 @@ on:
       - '!skipci-**'      # Skip CI branches
       - '!code-json-**'   # Skip automated code.json update branches  
       - '!snyk-**'        # Skip Snyk security branches
+      - '!dependabot**'        # Skip Snyk security branches
 
 concurrency:
   group: ${{ github.ref_name }}-group
