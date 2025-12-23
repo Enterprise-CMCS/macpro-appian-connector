@@ -1,7 +1,0 @@
-services:
-  alerts:
-    path: src/services/alerts
-  connector:
-    path: src/services/connector
-    params:
-      ecsFailureTopicArn: ${alerts.ECSFailureTopicArn}

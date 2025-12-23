@@ -1,10 +1,7 @@
 {
   "editor.formatOnSave": true,
-  "editor.insertFinalNewline": true,
-  "editor.trimFinalNewlines": false,
   "files.insertFinalNewline": true,
   "files.trimFinalNewlines": false,
-  "prettier.endOfLine": "lf",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
