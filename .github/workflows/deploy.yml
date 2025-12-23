@@ -3,11 +3,9 @@ name: Deploy
 on:
   push:
     branches:
-      - "*" # Allow all branches to trigger deployment
-      - "!skipci-**" # Skip CI branches
-      - "!code-json-**" # Skip automated code.json update branches
-      - "!snyk-**" # Skip Snyk security branches
-      - "!dependabot**" # Skip Snyk security branches
+      - master
+      - val
+      - production
 
 concurrency:
   group: ${{ github.ref_name }}-group
@@ -28,7 +26,7 @@ jobs:
       - name: Validate stage name
         run: |
           if [[ ! $STAGE_NAME =~ ^[a-z][a-z0-9-]*$ ]]; then
-              echo "ERROR:  Your branch name, $STAGE_NAME, is not a valid Serverless Framework stage name." && exit 1
+              echo "ERROR: Your branch name, $STAGE_NAME, is not a valid stage name." && exit 1
           fi
 
   deploy:
@@ -39,16 +37,25 @@ jobs:
       name: ${{ github.ref_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - uses: ./.github/actions/setup
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
           aws-region: us-east-1
           role-duration-seconds: 10800
 
-      - name: Deploy
-        run: run deploy --stage $STAGE_NAME
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build CDK
+        run: yarn build
+        working-directory: infra
+
+      - name: Deploy with CDK
+        run: |
+          cd infra
+          npx cdk deploy appian-alerts-$STAGE_NAME appian-connector-$STAGE_NAME --require-approval never
