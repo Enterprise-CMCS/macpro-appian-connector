@@ -4,6 +4,10 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as sns from 'aws-cdk-lib/aws-sns';
 
 export interface AppianAlertsMasterStackProps extends cdk.StackProps {
+  /**
+   * The deployment stage (e.g., 'master', 'val', 'production')
+   */
+  stage: string;
 }
 
 /**
@@ -16,8 +20,10 @@ export class AppianAlertsMasterStack extends cdk.Stack {
    */
   public readonly ecsFailureTopicArn;
 
-  public constructor(scope: cdk.App, id: string, props: AppianAlertsMasterStackProps = {}) {
+  public constructor(scope: cdk.App, id: string, props: AppianAlertsMasterStackProps) {
     super(scope, id, props);
+
+    const { stage } = props;
 
     // Resources
     const kmsKeyForSns = new kms.CfnKey(this, 'KmsKeyForSns', {
@@ -98,7 +104,7 @@ export class AppianAlertsMasterStack extends cdk.Stack {
     });
 
     const alertsTopic = new sns.CfnTopic(this, 'AlertsTopic', {
-      topicName: 'Alerts-appian-alerts-master',
+      topicName: `Alerts-appian-alerts-${stage}`,
       kmsMasterKeyId: kmsKeyForSns.ref,
     });
 
@@ -152,7 +158,7 @@ export class AppianAlertsMasterStack extends cdk.Stack {
         ],
       },
       topics: [
-        'arn:aws:sns:us-east-1:677829493285:Alerts-appian-alerts-master',
+        alertsTopic.ref,
       ],
     });
 
@@ -160,7 +166,7 @@ export class AppianAlertsMasterStack extends cdk.Stack {
     this.serverlessDeploymentBucketName = serverlessDeploymentBucket.ref;
     new cdk.CfnOutput(this, 'CfnOutputServerlessDeploymentBucketName', {
       key: 'ServerlessDeploymentBucketName',
-      exportName: 'sls-appian-alerts-master-ServerlessDeploymentBucketName',
+      exportName: `sls-appian-alerts-${stage}-ServerlessDeploymentBucketName`,
       value: this.serverlessDeploymentBucketName!.toString(),
     });
     this.ecsFailureTopicArn = alertsTopic.ref;

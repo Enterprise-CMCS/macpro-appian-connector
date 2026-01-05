@@ -28,7 +28,10 @@ async function main() {
 
   // Alerts Stack - SNS Topic, KMS Key, Topic Policy
   // Migrated from serverless appian-alerts-{stage} stack
-  new AppianAlertsMasterStack(app, `appian-alerts-${stage}`, stackProps);
+  new AppianAlertsMasterStack(app, `appian-alerts-${stage}`, {
+    ...stackProps,
+    stage,
+  });
 
   // Connector Stack - ECS Cluster, Service, Task Definition, Lambdas, CloudWatch Alarms
   // Migrated from serverless appian-connector-{stage} stack
