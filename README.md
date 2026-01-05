@@ -1,8 +1,8 @@
 <h1 align="center" style="border-bottom: none;">macpro-appian-connector</h1>
-<h3 align="center">A Kafka Connector to stream data changes from Appian to Bigmac.</h3>
+<h3 align="center">A Kafka Connector to stream data changes from Appian to BigMAC.</h3>
 <p align="center">
-  <a href="https://enterprise-cmcs.github.io/macpro-appian-connector/">
-    <img alt="Docs" src="https://img.shields.io/badge/Docs-Pages-blue.svg">
+  <a href="https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki">
+    <img alt="Wiki" src="https://img.shields.io/badge/Docs-Wiki-blue.svg">
   </a>
   <a href="https://cmsgov.slack.com/archives/C04K1444K89">
     <img alt="Slack" src="https://img.shields.io/badge/Slack-channel-purple.svg">
@@ -23,7 +23,7 @@
 
 ---
 
-### Please visit our [docs site](https://enterprise-cmcs.github.io/macpro-appian-connector/) for complete documentation
+### Documentation: [Wiki](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki) | [CDK Migration Guide](docs/CDK-MIGRATION.md)
 
 ---
 
@@ -34,6 +34,45 @@ A Kafka Connector to stream data changes from Appian to BigMAC.
 <p align="center">
   <img width="55%" src="docs/assets/architecture.png" alt="Architecture diagram">
 </p>
+
+## Technology Stack
+
+- **Infrastructure as Code**: AWS CDK (TypeScript)
+- **Runtime**: Node.js 20.x, TypeScript
+- **AWS Services**: ECS Fargate, Lambda, SNS, KMS, CloudWatch
+- **Streaming**: Apache Kafka, Kafka Connect
+
+## Quick Start
+
+```bash
+# Install dependencies
+yarn install
+
+# Deploy to master
+run deploy --stage master
+
+# Or deploy directly with CDK
+cd infra
+yarn build
+npx cdk deploy appian-alerts-master appian-connector-master
+```
+
+## Project Structure
+
+```
+macpro-appian-connector/
+├── infra/                    # AWS CDK infrastructure
+│   ├── bin/                  # CDK app entry point
+│   └── lib/                  # Stack definitions
+├── src/
+│   ├── types/                # Shared TypeScript types
+│   ├── libs/                 # Shared libraries
+│   └── services/
+│       └── connector/
+│           ├── handlers/     # Lambda handlers (TypeScript)
+│           └── libs/         # Connector-specific libraries
+└── docs/                     # Documentation site
+```
 
 ## Contributing
 
