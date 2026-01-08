@@ -1,6 +1,6 @@
 import yargs from "yargs";
 import * as dotenv from "dotenv";
-import LabeledProcessRunner from "./runner.js";
+import LabeledProcessRunner from "./runner";
 import * as fs from "fs";
 import { ServerlessStageDestroyer } from "@stratiformdigital/serverless-stage-destroyer";
 import { ServerlessRunningStages } from "@enterprise-cmcs/macpro-serverless-running-stages";
@@ -46,8 +46,8 @@ async function install_deps(runner: LabeledProcessRunner, dir: string) {
 }
 
 async function install_deps_for_services() {
-  var services = getDirectories("src/services");
-  for (let service of services) {
+  const services = getDirectories("src/services");
+  for (const service of services) {
     await install_deps(runner, `src/services/${service}`);
   }
   await install_deps(runner, "src/libs");
@@ -59,12 +59,11 @@ function getDirectories(path: string) {
   });
 }
 
-async function refreshOutputs(stage: string) {
+async function buildInfra() {
   await runner.run_command_and_output(
-    `SLS Refresh Outputs`,
-    ["sls", "refresh-outputs", "--stage", stage],
-    ".",
-    true
+    `CDK Build`,
+    ["yarn", "build"],
+    "infra"
   );
 }
 
@@ -74,25 +73,32 @@ yargs(process.argv.slice(2))
   })
   .command(
     "deploy",
-    "deploy the project",
+    "deploy the project using AWS CDK",
     {
       stage: { type: "string", demandOption: true },
-      service: { type: "string", demandOption: false },
     },
     async (options) => {
       await install_deps_for_services();
-      var deployCmd = ["sls", "deploy", "--stage", options.stage];
-      if (options.service) {
-        await refreshOutputs(options.stage);
-        deployCmd = [
-          "sls",
-          options.service,
+      await buildInfra();
+
+      // Deploy both stacks with CDK
+      // Stack names follow pattern: appian-{service}-{stage}
+      const stacks = [
+        `appian-alerts-${options.stage}`,
+        `appian-connector-${options.stage}`,
+      ];
+
+      await runner.run_command_and_output(
+        `CDK Deploy`,
+        [
+          "cdk",
           "deploy",
-          "--stage",
-          options.stage,
-        ];
-      }
-      await runner.run_command_and_output(`SLS Deploy`, deployCmd, ".");
+          ...stacks,
+          "--require-approval",
+          "never",
+        ],
+        "infra"
+      );
     }
   )
   .command(
@@ -103,12 +109,12 @@ yargs(process.argv.slice(2))
     },
     async (options) => {
       await install_deps_for_services();
-      await refreshOutputs(options.stage);
       await runner.run_command_and_output(
         `Unit Tests`,
         ["yarn", "test-ci"],
         "."
       );
+      console.log(`Tests completed for stage: ${options.stage}`);
     }
   )
   .command("test-gui", "open unit-testing gui for vitest.", {}, async () => {
@@ -129,11 +135,11 @@ yargs(process.argv.slice(2))
       verify: { type: "boolean", demandOption: false, default: true },
     },
     async (options) => {
-      let destroyer = new ServerlessStageDestroyer();
-      let filters = [
+      const destroyer = new ServerlessStageDestroyer();
+      const filters = [
         {
           Key: "PROJECT",
-          Value: `${process.env.PROJECT}`,
+          Value: "appian",
         },
       ];
       if (options.service) {
@@ -142,7 +148,7 @@ yargs(process.argv.slice(2))
           Value: `${options.service}`,
         });
       }
-      await destroyer.destroy(`${process.env.REGION_A}`, options.stage, {
+      await destroyer.destroy("us-east-1", options.stage, {
         wait: options.wait,
         filters: filters,
         verify: options.verify,
@@ -154,56 +160,17 @@ yargs(process.argv.slice(2))
     "Prints a connection string that can be run to 'ssh' directly onto the ECS Fargate task",
     {
       stage: { type: "string", demandOption: true },
-      service: { type: "string", demandOption: true },
+      cluster: { type: "string", demandOption: false, default: "appian-connector" },
     },
     async (options) => {
-      await install_deps_for_services();
-      await refreshOutputs(options.stage);
-      await runner.run_command_and_output(
-        `SLS connect`,
-        ["sls", options.service, "connect", "--stage", options.stage],
-        "."
-      );
-    }
-  )
-  .command(
-    "docs",
-    "Starts the Jekyll documentation site in a docker container, available on http://localhost:4000.",
-    {
-      stop: { type: "boolean", demandOption: false, default: false },
-    },
-    async (options) => {
-      // Always clean up first...
-      await runner.run_command_and_output(
-        `Stop any existing container.`,
-        ["docker", "rm", "-f", "jekyll"],
-        "docs"
-      );
-
-      // If we're starting...
-      if (!options.stop) {
-        await runner.run_command_and_output(
-          `Run docs at http://localhost:4000`,
-          [
-            "docker",
-            "run",
-            "--rm",
-            "-i",
-            "-v",
-            `${process.cwd()}/docs:/site`,
-            "--name",
-            "jekyll",
-            "--pull=always",
-            "-p",
-            "0.0.0.0:4000:4000",
-            "bretfisher/jekyll-serve",
-            "sh",
-            "-c",
-            "bundle install && bundle exec jekyll serve --force_polling --host 0.0.0.0",
-          ],
-          "docs"
-        );
-      }
+      const clusterName = `${options.cluster}-${options.stage}-connect`;
+      console.log(`\nTo connect to the ECS task, run:\n`);
+      console.log(`aws ecs execute-command \\`);
+      console.log(`  --cluster ${clusterName} \\`);
+      console.log(`  --task $(aws ecs list-tasks --cluster ${clusterName} --query 'taskArns[0]' --output text) \\`);
+      console.log(`  --container kafka-connect \\`);
+      console.log(`  --interactive \\`);
+      console.log(`  --command "/bin/bash"\n`);
     }
   )
   .command(
@@ -258,11 +225,9 @@ yargs(process.argv.slice(2))
     {},
     async () => {
       await install_deps_for_services();
-      for (const region of [process.env.REGION_A]) {
-        const runningStages =
-          await ServerlessRunningStages.getAllStagesForRegion(region!);
-        console.log(`runningStages=${runningStages.join(",")}`);
-      }
+      const runningStages =
+        await ServerlessRunningStages.getAllStagesForRegion("us-east-1");
+      console.log(`runningStages=${runningStages.join(",")}`);
     }
   )
   .command(
