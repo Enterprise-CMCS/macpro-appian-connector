@@ -11,7 +11,7 @@ export const connectors: ConnectorConfig[] = [
       "connection.password": process.env.legacydbPassword || "",
       "connection.url": `jdbc:oracle:thin:@${process.env.legacydbIp}:${process.env.legacydbPort}:${process.env.legacyDb}`,
       "topic.prefix": `${process.env.topicNamespace}aws.appian.cmcs.MCP_SPA_PCKG`,
-      "poll.interval.ms": 2000,
+      "poll.interval.ms": 300000,
       "batch.max.rows": 1000,
       query: queryString,
       mode: "timestamp+incrementing",
