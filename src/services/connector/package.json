@@ -4,7 +4,7 @@
   "description": "",
   "dependencies": {
     "cfn-response-async": "^1.0.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.23"
   },
   "devDependencies": {}
 }
