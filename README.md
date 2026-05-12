@@ -38,7 +38,7 @@ A Kafka Connector to stream data changes from Appian to BigMAC.
 ## Technology Stack
 
 - **Infrastructure as Code**: AWS CDK (TypeScript)
-- **Runtime**: Node.js 20.x, TypeScript
+- **Runtime**: Node.js 22.x, TypeScript
 - **AWS Services**: ECS Fargate, Lambda, SNS, KMS, CloudWatch
 - **Streaming**: Apache Kafka, Kafka Connect
 

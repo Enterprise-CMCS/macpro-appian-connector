@@ -139,7 +139,7 @@ This means:
 ### Prerequisites
 
 1. AWS CLI configured with appropriate credentials
-2. Node.js 20.x installed
+2. Node.js 22.x installed
 3. Yarn installed
 
 ### Promotion Process
@@ -319,4 +319,3 @@ If deployment fails with bootstrap-related errors:
 For issues or questions:
 - Slack: [#macpro-appian-connector](https://cmsgov.slack.com/archives/C04K1444K89)
 - Jira: [Project Board](https://qmacbis.atlassian.net/jira/software/c/projects/OY2/boards/240)
-

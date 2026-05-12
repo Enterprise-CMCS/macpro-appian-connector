@@ -470,7 +470,7 @@ export class AppianConnectorStack extends cdk.Stack {
     const configureConnectorsLambdaFunction = new NodejsFunction(this, "ConfigureConnectorsNodejs", {
       entry: path.join(handlersPath, "configureConnectors.ts"),
       handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
+      runtime: Runtime.NODEJS_22_X,
       functionName: `${servicePrefix}-configureConnectors`,
       memorySize: 1024,
       timeout: cdk.Duration.seconds(300),
@@ -547,7 +547,7 @@ export class AppianConnectorStack extends cdk.Stack {
     const testConnectorsLambdaFunction = new NodejsFunction(this, "TestConnectorsNodejs", {
       entry: path.join(handlersPath, "testConnectors.ts"),
       handler: "handler",
-      runtime: Runtime.NODEJS_20_X,
+      runtime: Runtime.NODEJS_22_X,
       functionName: `${servicePrefix}-testConnectors`,
       memorySize: 1024,
       timeout: cdk.Duration.seconds(300),
