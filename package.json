@@ -6,9 +6,8 @@
   "private": true,
   "main": "index.js",
   "workspaces": [
-    "src/libs",
-    "src/services/*",
-    "infra"
+    "src/*",
+    "infra/*"
   ],
   "directories": {
     "test": "tests"
