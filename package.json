@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/Enterprise-CMCS/macpro-appian-connector#readme",
   "resolutions": {
-    "@tootallnate/once": "3.0.1"
+    "http-proxy-agent": "^7.0.2"
   },
   "devDependencies": {
     "@enterprise-cmcs/macpro-security-hub-sync": "^1.14.5",
