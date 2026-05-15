@@ -29,6 +29,9 @@
     "url": "https://github.com/Enterprise-CMCS/macpro-appian-connector/issues"
   },
   "homepage": "https://github.com/Enterprise-CMCS/macpro-appian-connector#readme",
+  "resolutions": {
+    "http-proxy-agent": "^7.0.2"
+  },
   "devDependencies": {
     "@enterprise-cmcs/macpro-security-hub-sync": "^1.14.5",
     "@enterprise-cmcs/macpro-serverless-running-stages": "^1.0.4",
@@ -40,7 +43,7 @@
     "aws-cdk-lib": "2.233.0",
     "aws-sdk-client-mock": "^2.0.1",
     "constructs": "^10.0.0",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.0",
     "prettier": "2.7.1",
     "semantic-release": "^19.0.5",
     "typescript": "^5.0.0",
