@@ -29,6 +29,9 @@
     "url": "https://github.com/Enterprise-CMCS/macpro-appian-connector/issues"
   },
   "homepage": "https://github.com/Enterprise-CMCS/macpro-appian-connector#readme",
+  "resolutions": {
+    "@tootallnate/once": "3.0.1"
+  },
   "devDependencies": {
     "@enterprise-cmcs/macpro-security-hub-sync": "^1.14.5",
     "@enterprise-cmcs/macpro-serverless-running-stages": "^1.0.4",
