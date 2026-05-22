@@ -1,0 +1,16 @@
+{
+  "name": "pw-rotation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Automated DB password rotation handler triggered by Secrets Manager changes.",
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.864.0",
+    "@aws-sdk/client-secrets-manager": "^3.864.0",
+    "@aws-sdk/client-ses": "^3.864.0",
+    "@aws-sdk/client-ssm": "^3.864.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

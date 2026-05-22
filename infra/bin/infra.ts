@@ -2,6 +2,7 @@
 import * as cdk from 'aws-cdk-lib/core';
 import { AppianAlertsMasterStack } from '../lib/appian-alerts-master-stack';
 import { AppianConnectorStack } from '../lib/appian-connector-stack';
+import { AppianPwRotationStack } from '../lib/appian-pw-rotation-stack';
 import { getFullEnvironmentConfig } from '../lib/environment-config';
 
 async function main() {
@@ -36,10 +37,30 @@ async function main() {
   // Connector Stack - ECS Cluster, Service, Task Definition, Lambdas, CloudWatch Alarms
   // Migrated from serverless appian-connector-{stage} stack
   // Uses full environment configuration with secrets resolved from AWS Secrets Manager
-  new AppianConnectorStack(app, `appian-connector-${stage}`, {
+  const connectorStack = new AppianConnectorStack(app, `appian-connector-${stage}`, {
     ...stackProps,
     fullConfig,
   });
+
+  // Password Rotation Stack - automated handling when the appian/{stage}/dbInfo
+  // secret is updated in the AWS console. Optional: opt in by setting
+  // PW_ROTATION_SENDER (verified SES sender identity).
+  const notificationSender = process.env.PW_ROTATION_SENDER;
+  if (notificationSender) {
+    const rotationStack = new AppianPwRotationStack(app, `appian-pw-rotation-${stage}`, {
+      ...stackProps,
+      fullConfig,
+      configureConnectorsFunctionName: connectorStack.configureConnectorsLambdaName,
+      kafkaConnectClusterName: connectorStack.kafkaConnectClusterName,
+      kafkaConnectServiceName: connectorStack.kafkaConnectServiceName,
+      connectorName: 'source.jdbc.appian-connector-dbo-1',
+      configureConnectorsLambdaSecurityGroupId:
+        connectorStack.configureConnectorsLambdaSecurityGroupId,
+      notificationSender,
+      initialRecipients: process.env.PW_ROTATION_INITIAL_RECIPIENTS,
+    });
+    rotationStack.addDependency(connectorStack);
+  }
 
   app.synth();
 }
