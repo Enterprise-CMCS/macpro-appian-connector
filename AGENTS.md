@@ -1,9 +1,4 @@
-## Learned User Preferences
-
-- Prefer simple, flat CLI scripts over abstractions (avoid jq, temp files, and case switches when a direct approach works).
-- Prefer direct Lambda env update over CDK deploy for emergency password rotation.
-
-## Learned Workspace Facts
+# Learned Workspace Facts
 
 - Connector DB credentials live in AWS Secrets Manager at `appian/{stage}/dbInfo` (JSON `password` field), not SSM.
 - `configureConnectors` reads `legacydbPassword` from Lambda environment variables (set at CDK synth/deploy), not at runtime from Secrets Manager.

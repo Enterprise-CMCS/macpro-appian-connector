@@ -6,22 +6,13 @@ import { ECSClient } from "@aws-sdk/client-ecs";
 
 import { parseRotationEvent, InvalidRotationEventError } from "../libs/event-parser";
 import { readDbInfoSecret } from "../libs/secrets";
-import {
-  invokeConfigureConnectors,
-  updateConfigureConnectorsEnv,
-} from "../libs/lambda-updater";
+import { invokeConfigureConnectors, updateConfigureConnectorsEnv } from "../libs/lambda-updater";
 import { findKafkaConnectWorkerIp } from "../libs/ecs-discovery";
 import { verifyConnectorRunning as defaultVerifyConnectorRunning } from "../libs/connector-verifier";
 import { loadRecipients } from "../libs/recipients";
 import { buildRemediationPlan } from "../libs/remediation";
 import { sendRotationNotification } from "../libs/notifier";
-import type {
-  ParsedRotationTrigger,
-  RotationContext,
-  RotationPhase,
-  RotationResult,
-  VerificationOutcome,
-} from "../libs/types";
+import type { ParsedRotationTrigger, RotationContext, RotationPhase, RotationResult, VerificationOutcome } from "../libs/types";
 
 export interface RotationClients {
   secrets: SecretsManagerClient;
@@ -32,10 +23,7 @@ export interface RotationClients {
 }
 
 export interface RotationOverrides {
-  verifyConnectorRunning?: (
-    workerIp: string,
-    connectorName: string,
-  ) => Promise<VerificationOutcome>;
+  verifyConnectorRunning?: (workerIp: string, connectorName: string) => Promise<VerificationOutcome>;
 }
 
 export interface RotationConfig {
@@ -64,10 +52,9 @@ export async function runRotation(
   event: unknown,
   config: RotationConfig,
   clients: RotationClients,
-  overrides: RotationOverrides = {},
+  overrides: RotationOverrides = {}
 ): Promise<RotationResult> {
-  const verifyConnectorRunning =
-    overrides.verifyConnectorRunning ?? defaultVerifyConnectorRunning;
+  const verifyConnectorRunning = overrides.verifyConnectorRunning ?? defaultVerifyConnectorRunning;
   console.log("pw-rotation invoked");
 
   let trigger: ParsedRotationTrigger;
@@ -87,11 +74,7 @@ export async function runRotation(
     trigger,
   };
 
-  const failureResult = (
-    phase: RotationPhase,
-    error: unknown,
-    verification?: VerificationOutcome,
-  ): RotationResult => {
+  const failureResult = (phase: RotationPhase, error: unknown, verification?: VerificationOutcome): RotationResult => {
     const message = errorMessage(error);
     const remediation = buildRemediationPlan({
       phase,
@@ -116,31 +99,20 @@ export async function runRotation(
   }
 
   try {
-    await updateConfigureConnectorsEnv(
-      clients.lambda,
-      config.configureConnectorsFunctionName,
-      secret,
-    );
+    await updateConfigureConnectorsEnv(clients.lambda, config.configureConnectorsFunctionName, secret);
   } catch (error: unknown) {
     return finalize(clients, config, failureResult("update_lambda_env", error));
   }
 
   try {
-    await invokeConfigureConnectors(
-      clients.lambda,
-      config.configureConnectorsFunctionName,
-    );
+    await invokeConfigureConnectors(clients.lambda, config.configureConnectorsFunctionName);
   } catch (error: unknown) {
     return finalize(clients, config, failureResult("invoke_configure_connectors", error));
   }
 
   let verification: VerificationOutcome;
   try {
-    const workerIp = await findKafkaConnectWorkerIp(
-      clients.ecs,
-      config.cluster,
-      config.service,
-    );
+    const workerIp = await findKafkaConnectWorkerIp(clients.ecs, config.cluster, config.service);
     verification = await verifyConnectorRunning(workerIp, config.connectorName);
   } catch (error: unknown) {
     return finalize(clients, config, failureResult("verify_connector", error));
@@ -150,11 +122,7 @@ export async function runRotation(
     return finalize(
       clients,
       config,
-      failureResult(
-        "verify_connector",
-        new Error(`Connector did not reach RUNNING (status=${verification.status})`),
-        verification,
-      ),
+      failureResult("verify_connector", new Error(`Connector did not reach RUNNING (status=${verification.status})`), verification)
     );
   }
 
@@ -165,40 +133,23 @@ export async function runRotation(
   });
 }
 
-async function finalize(
-  clients: RotationClients,
-  config: RotationConfig,
-  result: RotationResult,
-): Promise<RotationResult> {
+async function finalize(clients: RotationClients, config: RotationConfig, result: RotationResult): Promise<RotationResult> {
   try {
-    const recipients = await loadRecipients(
-      clients.ssm,
-      config.recipientsParameterName,
-    );
-    await sendRotationNotification(
-      clients.ses,
-      { senderAddress: config.notificationSender, recipients },
-      result,
-    );
+    const recipients = await loadRecipients(clients.ssm, config.recipientsParameterName);
+    await sendRotationNotification(clients.ses, { senderAddress: config.notificationSender, recipients }, result);
   } catch (error: unknown) {
-    console.error(
-      `Failed to send rotation notification: ${errorMessage(error)}. Result kind=${result.kind}.`,
-    );
+    console.error(`Failed to send rotation notification: ${errorMessage(error)}. Result kind=${result.kind}.`);
   }
   return result;
 }
 
-function failBeforeContext(
-  config: RotationConfig,
-  phase: RotationPhase,
-  error: string,
-): RotationResult {
+function failBeforeContext(config: RotationConfig, phase: RotationPhase, error: string): RotationResult {
   const context: RotationContext = {
     stage: config.stage,
     region: config.region,
     trigger: {
-      secretIdentifier: "<unknown>",
-      eventName: "<unparseable>",
+      secretIdentifier: config.dbSecretId,
+      eventName: "parse-failed",
       eventTime: new Date().toISOString(),
     },
   };
