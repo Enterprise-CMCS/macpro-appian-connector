@@ -6,13 +6,13 @@ import {
 } from "@aws-sdk/client-lambda";
 import type { DbInfoSecret } from "./types";
 
-const ENV_KEYS_FROM_SECRET: ReadonlyArray<{ envKey: string; secretKey: keyof DbInfoSecret }> = [
-  { envKey: "legacydbIp", secretKey: "ip" },
-  { envKey: "legacydbPort", secretKey: "port" },
-  { envKey: "legacyDb", secretKey: "db" },
-  { envKey: "legacydbUser", secretKey: "user" },
-  { envKey: "legacydbPassword", secretKey: "password" },
-  { envKey: "legacyschema", secretKey: "schema" },
+const ENV_KEYS_FROM_DB_INFO: ReadonlyArray<{ envKey: string; dbInfoKey: keyof DbInfoSecret }> = [
+  { envKey: "legacydbIp", dbInfoKey: "ip" },
+  { envKey: "legacydbPort", dbInfoKey: "port" },
+  { envKey: "legacyDb", dbInfoKey: "db" },
+  { envKey: "legacydbUser", dbInfoKey: "user" },
+  { envKey: "legacydbPassword", dbInfoKey: "password" }, // pragma: allowlist secret
+  { envKey: "legacyschema", dbInfoKey: "schema" },
 ];
 
 const POLL_INTERVAL_MS = 1_500;
@@ -73,8 +73,8 @@ export async function updateConfigureConnectorsEnv(
 
 function mergeEnv(existing: Record<string, string>, secret: DbInfoSecret): Record<string, string> {
   const next: Record<string, string> = { ...existing };
-  for (const { envKey, secretKey } of ENV_KEYS_FROM_SECRET) {
-    next[envKey] = secret[secretKey];
+  for (const { envKey, dbInfoKey } of ENV_KEYS_FROM_DB_INFO) {
+    next[envKey] = secret[dbInfoKey];
   }
   return next;
 }

@@ -14,4 +14,5 @@ repos:
     rev: v1.1.0
     hooks:
       - id: detect-secrets
+        exclude: '(^|/)(tests?|__tests__)/|\.(test|spec)\.[jt]sx?$'
         args: ["--exclude-lines", "secretsmanager:"]
