@@ -37,6 +37,10 @@ export interface AppianConnectorStackProps extends cdk.StackProps {
 export class AppianConnectorStack extends cdk.Stack {
   public readonly serverlessDeploymentBucketName;
   public readonly kafkaConnectWorkerSecurityGroupId;
+  public readonly configureConnectorsLambdaSecurityGroupId: string;
+  public readonly configureConnectorsLambdaName: string;
+  public readonly kafkaConnectClusterName: string;
+  public readonly kafkaConnectServiceName: string;
 
   public constructor(scope: cdk.App, id: string, props: AppianConnectorStackProps) {
     super(scope, id, props);
@@ -607,6 +611,10 @@ export class AppianConnectorStack extends cdk.Stack {
       exportName: `sls-appian-connector-${stage}-ServerlessDeploymentBucketName`,
       value: this.serverlessDeploymentBucketName!.toString(),
     });
+    this.configureConnectorsLambdaSecurityGroupId = lambdaConfigureConnectorsSecurityGroup.ref;
+    this.configureConnectorsLambdaName = configureConnectorsLambdaFunction.functionName;
+    this.kafkaConnectClusterName = kafkaConnectCluster.ref;
+    this.kafkaConnectServiceName = kafkaConnectService.attrName;
     this.kafkaConnectWorkerSecurityGroupId = kafkaConnectWorkerSecurityGroup.ref;
     new cdk.CfnOutput(this, "CfnOutputKafkaConnectWorkerSecurityGroupId", {
       key: "KafkaConnectWorkerSecurityGroupId",
