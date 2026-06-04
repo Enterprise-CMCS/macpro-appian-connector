@@ -4,11 +4,12 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as events from "aws-cdk-lib/aws-events";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { Runtime, Tracing } from "aws-cdk-lib/aws-lambda";
 import * as path from "path";
 import { FullEnvironmentConfig } from "./environment-config";
 
@@ -59,8 +60,15 @@ export class AppianConnectorStack extends cdk.Stack {
     const handlersPath = path.join(__dirname, "../../src/services/connector/handlers");
 
     // Resources
+    const connectorLogsKey = new kms.Key(this, "ConnectorLogsKey", {
+      description: `KMS key for ${servicePrefix} CloudWatch log groups`,
+      enableKeyRotation: true,
+    });
+
     const configureConnectorsLogGroup = new logs.CfnLogGroup(this, "ConfigureConnectorsLogGroup", {
       logGroupName: `/aws/lambda/${servicePrefix}-configureConnectors`,
+      kmsKeyId: connectorLogsKey.keyArn,
+      retentionInDays: 30,
     });
 
     const connectorLogsErrorCountAlarm = new cloudwatch.CfnAlarm(this, "ConnectorLogsErrorCountAlarm", {
@@ -187,6 +195,8 @@ export class AppianConnectorStack extends cdk.Stack {
 
     const kafkaConnectWorkerLogGroup = new logs.CfnLogGroup(this, "KafkaConnectWorkerLogGroup", {
       logGroupName: `/aws/fargate/${servicePrefix}-kafka-connect`,
+      kmsKeyId: connectorLogsKey.keyArn,
+      retentionInDays: 30,
     });
 
     const kafkaConnectWorkerRole = new iam.CfnRole(this, "KafkaConnectWorkerRole", {
@@ -265,6 +275,8 @@ export class AppianConnectorStack extends cdk.Stack {
 
     const testConnectorsLogGroup = new logs.CfnLogGroup(this, "TestConnectorsLogGroup", {
       logGroupName: `/aws/lambda/${servicePrefix}-testConnectors`,
+      kmsKeyId: connectorLogsKey.keyArn,
+      retentionInDays: 30,
     });
 
     const connectorLogsErrorCount = new logs.CfnMetricFilter(this, "ConnectorLogsErrorCount", {
@@ -475,6 +487,7 @@ export class AppianConnectorStack extends cdk.Stack {
       entry: path.join(handlersPath, "configureConnectors.ts"),
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
+      tracing: Tracing.ACTIVE,
       functionName: `${servicePrefix}-configureConnectors`,
       memorySize: 1024,
       timeout: cdk.Duration.seconds(300),
@@ -552,6 +565,7 @@ export class AppianConnectorStack extends cdk.Stack {
       entry: path.join(handlersPath, "testConnectors.ts"),
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
+      tracing: Tracing.ACTIVE,
       functionName: `${servicePrefix}-testConnectors`,
       memorySize: 1024,
       timeout: cdk.Duration.seconds(300),
