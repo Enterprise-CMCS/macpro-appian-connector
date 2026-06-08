@@ -64,6 +64,20 @@ export class AppianConnectorStack extends cdk.Stack {
       description: `KMS key for ${servicePrefix} CloudWatch log groups`,
       enableKeyRotation: true,
     });
+    connectorLogsKey.addToResourcePolicy(
+      new iam.PolicyStatement({
+        sid: "AllowCloudWatchLogsUseOfKey",
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal(`logs.${this.region}.amazonaws.com`)],
+        actions: ["kms:Encrypt", "kms:Decrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:Describe*"],
+        resources: ["*"],
+        conditions: {
+          ArnLike: {
+            "kms:EncryptionContext:aws:logs:arn": `arn:${this.partition}:logs:${this.region}:${this.account}:log-group:*`,
+          },
+        },
+      })
+    );
 
     const configureConnectorsLogGroup = new logs.CfnLogGroup(this, "ConfigureConnectorsLogGroup", {
       logGroupName: `/aws/lambda/${servicePrefix}-configureConnectors`,

@@ -44,6 +44,30 @@ function synthesizeTemplate() {
 }
 
 describe("AppianConnectorStack security controls", () => {
+  it("allows CloudWatch Logs to use the connector log encryption key", () => {
+    const template = synthesizeTemplate();
+
+    template.hasResourceProperties("AWS::KMS::Key", {
+      KeyPolicy: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Sid: "AllowCloudWatchLogsUseOfKey",
+            Effect: "Allow",
+            Principal: {
+              Service: "logs.us-east-1.amazonaws.com",
+            },
+            Action: Match.arrayWith(["kms:Encrypt", "kms:Decrypt", "kms:GenerateDataKey*", "kms:Describe*"]),
+            Condition: {
+              ArnLike: {
+                "kms:EncryptionContext:aws:logs:arn": Match.anyValue(),
+              },
+            },
+          }),
+        ]),
+      },
+    });
+  });
+
   it("encrypts connector log groups and sets retention", () => {
     const template = synthesizeTemplate();
 
