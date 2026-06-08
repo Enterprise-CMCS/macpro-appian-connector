@@ -83,4 +83,20 @@ describe("AppianConnectorStack security controls", () => {
       });
     }
   });
+
+  it("uses the stack-managed Lambda execution role ARN for connector functions", () => {
+    const template = synthesizeTemplate();
+
+    for (const functionName of [
+      "appian-connector-master-configureConnectors",
+      "appian-connector-master-testConnectors",
+    ]) {
+      template.hasResourceProperties("AWS::Lambda::Function", {
+        FunctionName: functionName,
+        Role: {
+          "Fn::GetAtt": ["IamRoleLambdaExecution", "Arn"],
+        },
+      });
+    }
+  });
 });
