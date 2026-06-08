@@ -140,6 +140,7 @@ export class AppianPwRotationStack extends cdk.Stack {
         },
       ],
     });
+    const rotationRoleName = `appian-pw-rotation-${stage}-${this.region}-lambdaRole`;
 
     const rotationFn = new NodejsFunction(this, "RotationFunction", {
       entry: path.join(__dirname, "../../src/services/pw-rotation/handlers/rotateDbPassword.ts"),
@@ -149,7 +150,7 @@ export class AppianPwRotationStack extends cdk.Stack {
       memorySize: 512,
       timeout: cdk.Duration.minutes(5),
       logGroup: logs.LogGroup.fromLogGroupName(this, "RotationLogGroupRef", logGroup.logGroupName!),
-      role: iam.Role.fromRoleArn(this, "RotationRoleRef", rotationRole.attrArn),
+      role: iam.Role.fromRoleName(this, "RotationRoleRef", rotationRoleName),
       environment: {
         STAGE: stage,
         DB_SECRET_ID: `appian/${stage}/dbInfo`,

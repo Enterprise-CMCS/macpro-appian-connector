@@ -9,7 +9,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
-import { Runtime, Tracing } from "aws-cdk-lib/aws-lambda";
+import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as path from "path";
 import { FullEnvironmentConfig } from "./environment-config";
 
@@ -158,6 +158,7 @@ export class AppianConnectorStack extends cdk.Stack {
       permissionsBoundary: iamPermissionsBoundary,
       managedPolicyArns: [`arn:${this.partition}:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole`],
     });
+    const lambdaExecutionRoleName = `appian-connector-${stage}-${this.region}-lambdaRole`;
 
     const jdbcConnectorAlarm = new cloudwatch.CfnAlarm(this, "JdbcConnectorAlarm", {
       alarmActions: [alertsTopicArn],
@@ -487,7 +488,6 @@ export class AppianConnectorStack extends cdk.Stack {
       entry: path.join(handlersPath, "configureConnectors.ts"),
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
-      tracing: Tracing.ACTIVE,
       functionName: `${servicePrefix}-configureConnectors`,
       memorySize: 1024,
       timeout: cdk.Duration.seconds(300),
@@ -503,7 +503,7 @@ export class AppianConnectorStack extends cdk.Stack {
         legacydbPassword: dbInfo.password,
         legacyschema: dbInfo.schema,
       },
-      role: iam.Role.fromRoleArn(this, "ConfigureConnectorsRole", iamRoleLambdaExecution.attrArn),
+      role: iam.Role.fromRoleName(this, "ConfigureConnectorsRole", lambdaExecutionRoleName),
       vpc: ec2.Vpc.fromVpcAttributes(this, "ConfigureConnectorsVpc", {
         vpcId: vpc.id,
         availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"],
@@ -565,7 +565,6 @@ export class AppianConnectorStack extends cdk.Stack {
       entry: path.join(handlersPath, "testConnectors.ts"),
       handler: "handler",
       runtime: Runtime.NODEJS_22_X,
-      tracing: Tracing.ACTIVE,
       functionName: `${servicePrefix}-testConnectors`,
       memorySize: 1024,
       timeout: cdk.Duration.seconds(300),
@@ -575,7 +574,7 @@ export class AppianConnectorStack extends cdk.Stack {
         service: kafkaConnectService.ref,
         namespace: servicePrefix,
       },
-      role: iam.Role.fromRoleArn(this, "TestConnectorsRole", iamRoleLambdaExecution.attrArn),
+      role: iam.Role.fromRoleName(this, "TestConnectorsRole", lambdaExecutionRoleName),
       vpc: ec2.Vpc.fromVpcAttributes(this, "TestConnectorsVpc", {
         vpcId: vpc.id,
         availabilityZones: ["us-east-1a", "us-east-1b", "us-east-1c"],

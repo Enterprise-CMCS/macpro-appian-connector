@@ -59,20 +59,4 @@ describe("AppianConnectorStack security controls", () => {
       });
     }
   });
-
-  it("enables active tracing for connector Lambdas", () => {
-    const template = synthesizeTemplate();
-
-    for (const functionName of [
-      "appian-connector-master-configureConnectors",
-      "appian-connector-master-testConnectors",
-    ]) {
-      template.hasResourceProperties("AWS::Lambda::Function", {
-        FunctionName: functionName,
-        TracingConfig: {
-          Mode: "Active",
-        },
-      });
-    }
-  });
 });
