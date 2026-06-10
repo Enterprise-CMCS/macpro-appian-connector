@@ -32,6 +32,7 @@
   "resolutions": {
     "**/ajv": "8.20.0",
     "**/fast-uri": "3.1.2",
+    "**/qs": "6.15.2",
     "http-proxy-agent": "^7.0.2"
   },
   "devDependencies": {
