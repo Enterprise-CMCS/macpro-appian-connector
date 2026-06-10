@@ -4,6 +4,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as ecs from "aws-cdk-lib/aws-ecs";
 import * as events from "aws-cdk-lib/aws-events";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as kms from "aws-cdk-lib/aws-kms";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as s3 from "aws-cdk-lib/aws-s3";
@@ -59,8 +60,29 @@ export class AppianConnectorStack extends cdk.Stack {
     const handlersPath = path.join(__dirname, "../../src/services/connector/handlers");
 
     // Resources
+    const connectorLogsKey = new kms.Key(this, "ConnectorLogsKey", {
+      description: `KMS key for ${servicePrefix} CloudWatch log groups`,
+      enableKeyRotation: true,
+    });
+    connectorLogsKey.addToResourcePolicy(
+      new iam.PolicyStatement({
+        sid: "AllowCloudWatchLogsUseOfKey",
+        effect: iam.Effect.ALLOW,
+        principals: [new iam.ServicePrincipal(`logs.${this.region}.amazonaws.com`)],
+        actions: ["kms:Encrypt", "kms:Decrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:Describe*"],
+        resources: ["*"],
+        conditions: {
+          ArnLike: {
+            "kms:EncryptionContext:aws:logs:arn": `arn:${this.partition}:logs:${this.region}:${this.account}:log-group:*`,
+          },
+        },
+      })
+    );
+
     const configureConnectorsLogGroup = new logs.CfnLogGroup(this, "ConfigureConnectorsLogGroup", {
       logGroupName: `/aws/lambda/${servicePrefix}-configureConnectors`,
+      kmsKeyId: connectorLogsKey.keyArn,
+      retentionInDays: 30,
     });
 
     const connectorLogsErrorCountAlarm = new cloudwatch.CfnAlarm(this, "ConnectorLogsErrorCountAlarm", {
@@ -187,6 +209,8 @@ export class AppianConnectorStack extends cdk.Stack {
 
     const kafkaConnectWorkerLogGroup = new logs.CfnLogGroup(this, "KafkaConnectWorkerLogGroup", {
       logGroupName: `/aws/fargate/${servicePrefix}-kafka-connect`,
+      kmsKeyId: connectorLogsKey.keyArn,
+      retentionInDays: 30,
     });
 
     const kafkaConnectWorkerRole = new iam.CfnRole(this, "KafkaConnectWorkerRole", {
@@ -265,6 +289,8 @@ export class AppianConnectorStack extends cdk.Stack {
 
     const testConnectorsLogGroup = new logs.CfnLogGroup(this, "TestConnectorsLogGroup", {
       logGroupName: `/aws/lambda/${servicePrefix}-testConnectors`,
+      kmsKeyId: connectorLogsKey.keyArn,
+      retentionInDays: 30,
     });
 
     const connectorLogsErrorCount = new logs.CfnMetricFilter(this, "ConnectorLogsErrorCount", {

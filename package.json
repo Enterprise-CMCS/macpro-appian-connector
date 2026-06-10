@@ -30,6 +30,8 @@
   },
   "homepage": "https://github.com/Enterprise-CMCS/macpro-appian-connector#readme",
   "resolutions": {
+    "**/ajv": "8.20.0",
+    "**/fast-uri": "3.1.2",
     "http-proxy-agent": "^7.0.2"
   },
   "devDependencies": {
@@ -39,8 +41,8 @@
     "@types/node": "^20.0.0",
     "@vitest/coverage-v8": "^3.2.1",
     "@vitest/ui": "^3.2.1",
-    "aws-cdk": "2.1100.1",
-    "aws-cdk-lib": "2.233.0",
+    "aws-cdk": "2.1126.0",
+    "aws-cdk-lib": "2.257.0",
     "aws-sdk-client-mock": "^2.0.1",
     "constructs": "^10.0.0",
     "esbuild": "^0.25.0",
@@ -59,5 +61,6 @@
       "@semantic-release/github",
       "@semantic-release/npm"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
