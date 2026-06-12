@@ -32,11 +32,9 @@
   "resolutions": {
     "**/ajv": "8.20.0",
     "**/fast-uri": "3.1.2",
-    "**/qs": "6.15.2",
     "http-proxy-agent": "^7.0.2"
   },
   "devDependencies": {
-    "@enterprise-cmcs/macpro-security-hub-sync": "^1.14.5",
     "@enterprise-cmcs/macpro-serverless-running-stages": "^1.0.4",
     "@stratiformdigital/serverless-stage-destroyer": "^2.0.0",
     "@types/node": "^20.0.0",
@@ -46,6 +44,7 @@
     "aws-cdk-lib": "2.257.0",
     "aws-sdk-client-mock": "^2.0.1",
     "constructs": "^10.0.0",
+    "dotenv": "^16.0.3",
     "esbuild": "^0.25.0",
     "prettier": "2.7.1",
     "semantic-release": "^19.0.5",
