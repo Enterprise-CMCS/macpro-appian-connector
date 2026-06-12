@@ -4,7 +4,6 @@ import LabeledProcessRunner from "./runner";
 import * as fs from "fs";
 import { ServerlessStageDestroyer } from "@stratiformdigital/serverless-stage-destroyer";
 import { ServerlessRunningStages } from "@enterprise-cmcs/macpro-serverless-running-stages";
-import { SecurityHubJiraSync } from "@enterprise-cmcs/macpro-security-hub-sync";
 
 // load .env
 dotenv.config();
@@ -228,22 +227,6 @@ yargs(process.argv.slice(2))
       const runningStages =
         await ServerlessRunningStages.getAllStagesForRegion("us-east-1");
       console.log(`runningStages=${runningStages.join(",")}`);
-    }
-  )
-  .command(
-    ["securityHubJiraSync", "securityHubSync", "secHubSync"],
-    "Create Jira Issues for Security Hub findings.",
-    {},
-    async () => {
-      await install_deps_for_services();
-      await new SecurityHubJiraSync({
-        customJiraFields: {
-          customfield_14117: [{ value: "Platform Team" }],
-          customfield_14151: [{ value: "Not Applicable " }],
-          customfield_14068:
-            "* All findings of this type are resolved or suppressed, indicated by a Workflow Status of Resolved or Suppressed.  (Note:  this ticket will automatically close when the AC is met.)",
-        },
-      }).sync();
     }
   )
   .strict() // This errors and prints help if you pass an unknown command
