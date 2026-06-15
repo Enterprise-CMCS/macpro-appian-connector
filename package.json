@@ -45,7 +45,7 @@
     "aws-sdk-client-mock": "^2.0.1",
     "constructs": "^10.0.0",
     "dotenv": "^16.0.3",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.28.1",
     "prettier": "2.7.1",
     "semantic-release": "^19.0.5",
     "typescript": "^5.0.0",
