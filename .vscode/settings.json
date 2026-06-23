@@ -13,5 +13,7 @@
   },
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "snyk.advanced.organization": "94c22089-6f49-42e4-9f70-7b1ce3bee2dc",
+  "snyk.advanced.autoSelectOrganization": true
 }

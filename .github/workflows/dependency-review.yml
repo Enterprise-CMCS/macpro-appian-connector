@@ -15,6 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Repository"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: "Dependency Review"
-        uses: actions/dependency-review-action@v2
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: low
+          fail-on-scopes: runtime
+          show-patched-versions: true
+          # js-yaml is currently introduced through dev-only TSLint/Jest tooling that
+          # still declares the v3 API. Keep the runtime gate while avoiding a risky
+          # forced v4 override in this release PR.
+          allow-ghsas: GHSA-h67p-54hq-rp68

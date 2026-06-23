@@ -23,7 +23,7 @@
 
 ---
 
-### Documentation: [Wiki](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki) | [CDK Migration Guide](docs/CDK-MIGRATION.md)
+### Documentation: [Wiki](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki) · [CDK migration guide](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki/CDK-Migration-Guide) · [Architecture diagram](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki)
 
 ---
 
@@ -32,7 +32,7 @@
 A Kafka Connector to stream data changes from Appian to BigMAC.
 
 <p align="center">
-  <img width="55%" src="docs/assets/architecture.png" alt="Architecture diagram">
+  <a href="https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki">View architecture diagram in the Wiki →</a>
 </p>
 
 ## Technology Stack
@@ -71,7 +71,6 @@ macpro-appian-connector/
 │       └── connector/
 │           ├── handlers/     # Lambda handlers (TypeScript)
 │           └── libs/         # Connector-specific libraries
-└── docs/                     # Documentation site
 ```
 
 ## Contributing

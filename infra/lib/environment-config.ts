@@ -1,4 +1,4 @@
-import { SecretsManager } from 'aws-sdk';
+import { SecretsManager } from "aws-sdk";
 
 /**
  * Secret path patterns for AWS Secrets Manager.
@@ -7,16 +7,16 @@ import { SecretsManager } from 'aws-sdk';
  */
 export const SecretPaths = {
   vpc: (stage: string) => `appian/${stage}/vpc`,
-  vpcDefault: 'appian/default/vpc',
+  vpcDefault: "appian/default/vpc",
   brokerString: (stage: string) => `appian/${stage}/brokerString`,
-  brokerStringDefault: 'appian/default/brokerString',
+  brokerStringDefault: "appian/default/brokerString",
   dbInfo: (stage: string) => `appian/${stage}/dbInfo`,
-  dbInfoDefault: 'appian/default/dbInfo',
+  dbInfoDefault: "appian/default/dbInfo",
   iamPath: (stage: string) => `appian/${stage}/iam/path`,
-  iamPathDefault: 'appian/default/iam/path',
+  iamPathDefault: "appian/default/iam/path",
   iamPermissionsBoundary: (stage: string) => `appian/${stage}/iam/permissionsBoundary`,
-  iamPermissionsBoundaryDefault: 'appian/default/iam/permissionsBoundary',
-  ecrImage: 'ecr/images/appian/appian-connector',
+  iamPermissionsBoundaryDefault: "appian/default/iam/permissionsBoundary",
+  ecrImage: "ecr/images/appian/appian-connector",
 } as const;
 
 /**
@@ -79,25 +79,25 @@ export interface FullEnvironmentConfig extends EnvironmentConfig {
  */
 export const environmentConfigs: Record<string, EnvironmentConfig> = {
   master: {
-    stage: 'master',
-    taskCpu: '1024',
-    taskMemory: '2048',
+    stage: "master",
+    taskCpu: "1024",
+    taskMemory: "2048",
     connectContainerCpu: 512,
     connectContainerMemory: 1024,
     instantClientContainerMemory: 512,
   },
   val: {
-    stage: 'val',
-    taskCpu: '1024',
-    taskMemory: '3072',
+    stage: "val",
+    taskCpu: "1024",
+    taskMemory: "3072",
     connectContainerCpu: 512,
     connectContainerMemory: 2560,
     instantClientContainerMemory: 512,
   },
   production: {
-    stage: 'production',
-    taskCpu: '2048',
-    taskMemory: '6144',
+    stage: "production",
+    taskCpu: "2048",
+    taskMemory: "6144",
     connectContainerCpu: 2048,
     connectContainerMemory: 4096,
     instantClientContainerMemory: 2048,
@@ -117,7 +117,7 @@ export function getEnvironmentConfig(stage: string): EnvironmentConfig {
  * This is used at synth-time to resolve secrets.
  */
 async function getSecretValue(secretId: string): Promise<string> {
-  const client = new SecretsManager({ region: process.env.AWS_REGION || 'us-east-1' });
+  const client = new SecretsManager({ region: process.env.AWS_REGION || "us-east-1" });
   const response = await client.getSecretValue({ SecretId: secretId }).promise();
   if (response.SecretString) {
     return response.SecretString;
@@ -175,7 +175,7 @@ export async function loadEnvironmentSecrets(stage: string): Promise<{
 export async function getFullEnvironmentConfig(stage: string): Promise<FullEnvironmentConfig> {
   const baseConfig = getEnvironmentConfig(stage);
   const secrets = await loadEnvironmentSecrets(stage);
-  
+
   return {
     ...baseConfig,
     ...secrets,
