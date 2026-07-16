@@ -27,7 +27,7 @@ The infrastructure consists of two CloudFormation stacks:
 
 ## Prerequisites
 
-- Node.js 20.x
+- Node.js 24.x
 - Yarn
 - AWS CLI configured with appropriate credentials
 - CDK Bootstrap stack with qualifier `one` (already deployed in target accounts)
