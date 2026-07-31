@@ -8,7 +8,7 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
-import * as path from "path";
+import * as path from "node:path";
 
 import { FullEnvironmentConfig } from "./environment-config";
 
@@ -145,7 +145,7 @@ export class AppianPwRotationStack extends cdk.Stack {
     const rotationFn = new NodejsFunction(this, "RotationFunction", {
       entry: path.join(__dirname, "../../src/services/pw-rotation/handlers/rotateDbPassword.ts"),
       handler: "handler",
-      runtime: Runtime.NODEJS_22_X,
+      runtime: Runtime.NODEJS_24_X,
       functionName: `${servicePrefix}-rotateDbPassword`,
       memorySize: 512,
       timeout: cdk.Duration.minutes(5),
