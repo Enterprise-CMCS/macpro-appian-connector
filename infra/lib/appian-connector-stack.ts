@@ -10,7 +10,7 @@ import * as logs from "aws-cdk-lib/aws-logs";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
-import * as path from "path";
+import * as path from "node:path";
 import { FullEnvironmentConfig } from "./environment-config";
 
 export interface AppianConnectorStackProps extends cdk.StackProps {
@@ -500,7 +500,7 @@ export class AppianConnectorStack extends cdk.Stack {
     const configureConnectorsLambdaFunction = new NodejsFunction(this, "ConfigureConnectorsNodejs", {
       entry: path.join(handlersPath, "configureConnectors.ts"),
       handler: "handler",
-      runtime: Runtime.NODEJS_22_X,
+      runtime: Runtime.NODEJS_24_X,
       functionName: `${servicePrefix}-configureConnectors`,
       memorySize: 1024,
       timeout: cdk.Duration.seconds(300),
@@ -577,7 +577,7 @@ export class AppianConnectorStack extends cdk.Stack {
     const testConnectorsLambdaFunction = new NodejsFunction(this, "TestConnectorsNodejs", {
       entry: path.join(handlersPath, "testConnectors.ts"),
       handler: "handler",
-      runtime: Runtime.NODEJS_22_X,
+      runtime: Runtime.NODEJS_24_X,
       functionName: `${servicePrefix}-testConnectors`,
       memorySize: 1024,
       timeout: cdk.Duration.seconds(300),
