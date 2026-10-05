@@ -69,6 +69,7 @@ export interface ConnectorStatus {
     id: number;
     state: string;
     worker_id: string;
+    trace?: string | null;
   }>;
   type: string;
 }

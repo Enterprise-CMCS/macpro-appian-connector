@@ -84,6 +84,37 @@ describe("AppianConnectorStack security controls", () => {
     }
   });
 
+  it("alarms on oracle auth failures through the existing alerts topic", () => {
+    const template = synthesizeTemplate();
+    const alarms = template.findResources("AWS::CloudWatch::Alarm");
+
+    template.hasResourceProperties("AWS::CloudWatch::Alarm", {
+      AlarmActions: ["arn:aws:sns:us-east-1:123456789012:Alerts-appian-alerts-master"],
+      ComparisonOperator: "GreaterThanOrEqualToThreshold",
+      DatapointsToAlarm: 1,
+      EvaluationPeriods: 1,
+      MetricName: "source.jdbc.appian-connector-dbo-1_oracle_auth_failures",
+      Namespace: "appian-connector-master",
+      Period: 60,
+      Statistic: "Sum",
+      Threshold: 1,
+      TreatMissingData: "notBreaching",
+    });
+
+    template.hasResourceProperties("AWS::CloudWatch::Alarm", {
+      MetricName: "source.jdbc.appian-dbo-1_failures",
+    });
+    template.hasResourceProperties("AWS::CloudWatch::Alarm", {
+      MetricName: "source.jdbc.appian-dbo-1_task_failures",
+    });
+
+    const oracleErrorAlarms = Object.values(alarms).filter((alarm) => {
+      const metricName = alarm.Properties?.MetricName;
+      return typeof metricName === "string" && metricName.includes("oracle_errors");
+    });
+    expect(oracleErrorAlarms).toHaveLength(0);
+  });
+
   it("uses the stack-managed Lambda execution role ARN for connector functions", () => {
     const template = synthesizeTemplate();
 

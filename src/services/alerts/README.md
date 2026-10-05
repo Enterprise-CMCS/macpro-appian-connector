@@ -10,6 +10,18 @@ The pattern of this flow is shown below:
 
 The SNS Subscription service associated with the topic is managed manually, this allows for users to be added / removed without being deployed. Additionally, we can create subscription services in specific environments (val/prod).
 
+Connector alarms, including the Oracle authentication alarm, publish to `Alerts-appian-alerts-<stage>`. Subscribe an email address, then confirm the link AWS sends:
+
+```bash
+aws sns subscribe \
+  --region us-east-1 \
+  --topic-arn arn:aws:sns:us-east-1:ACCOUNT_ID:Alerts-appian-alerts-STAGE \
+  --protocol email \
+  --notification-endpoint you@example.com
+```
+
+Addresses are not committed. Each recipient is a separate subscription on that topic.
+
 ## Testing
 
 You can manually test events sent to EventBridge with the [AWS CLI](https://aws.amazon.com/cli/)

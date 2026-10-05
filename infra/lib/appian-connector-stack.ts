@@ -197,6 +197,19 @@ export class AppianConnectorStack extends cdk.Stack {
       threshold: 1,
     });
 
+    const jdbcOracleAuthAlarm = new cloudwatch.CfnAlarm(this, "JdbcOracleAuthAlarm", {
+      alarmActions: [alertsTopicArn],
+      comparisonOperator: "GreaterThanOrEqualToThreshold",
+      datapointsToAlarm: 1,
+      evaluationPeriods: 1,
+      metricName: "source.jdbc.appian-connector-dbo-1_oracle_auth_failures",
+      namespace: servicePrefix,
+      period: 60,
+      statistic: "Sum",
+      threshold: 1,
+      treatMissingData: "notBreaching",
+    });
+
     const kafkaConnectCluster = new ecs.CfnCluster(this, "KafkaConnectCluster", {
       clusterName: `${servicePrefix}-connect`,
       clusterSettings: [
