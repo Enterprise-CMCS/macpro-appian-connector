@@ -200,12 +200,19 @@ export async function testConnector(ip: string, config: ConnectorConfig): Promis
           reject(error);
         })
         .on("end", () => {
-          console.log(responseData);
           try {
             const data = JSON.parse(responseData) as ConnectorStatus;
+            console.log(
+              "Kafka connector status",
+              JSON.stringify({
+                name: data.name,
+                connectorState: data.connector?.state,
+                tasks: (data.tasks ?? []).map((task) => ({ id: task.id, state: task.state })),
+              })
+            );
             resolve(data);
           } catch (e) {
-            reject(new Error(`Failed to parse response: ${responseData}`));
+            reject(new Error("Failed to parse connector status response"));
           }
         });
     });
