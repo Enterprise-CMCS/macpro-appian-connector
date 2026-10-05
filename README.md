@@ -23,7 +23,7 @@
 
 ---
 
-### Documentation: [Wiki](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki) · [CDK migration guide](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki/CDK-Migration-Guide) · [Architecture diagram](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki)
+### Documentation: [Wiki](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki) · [CDK migration guide](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki/CDK-Migration-Guide) · [Architecture diagram](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki) · [Database credential rotation runbook](https://confluenceent.cms.gov/pages/viewpage.action?pageId=1504366491)
 
 ---
 
