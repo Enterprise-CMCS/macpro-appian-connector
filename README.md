@@ -23,7 +23,7 @@
 
 ---
 
-### Documentation: [Wiki](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki) · [CDK migration guide](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki/CDK-Migration-Guide) · [Architecture diagram](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki)
+### Documentation: [Wiki](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki) · [CDK migration guide](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki/CDK-Migration-Guide) · [Architecture diagram](https://github.com/Enterprise-CMCS/macpro-appian-connector/wiki) · [Database credential rotation runbook](https://confluenceent.cms.gov/pages/viewpage.action?pageId=1504366491)
 
 ---
 
@@ -72,6 +72,24 @@ macpro-appian-connector/
 │           ├── handlers/     # Lambda handlers (TypeScript)
 │           └── libs/         # Connector-specific libraries
 ```
+
+## Alert email subscriptions
+
+Connector alarms, including Oracle authentication and account-lock failures, publish to the SNS topic `Alerts-appian-alerts-<stage>` in that stage's account. The auth alarm watches `{connectorName}_oracle_auth_failures`. Other connector alarms use the same topic. Email subscriptions are added by hand and are not stored in this repository.
+
+1. Subscribe with the AWS CLI. Use the profile for that stage, and replace the account id, stage, and email address.
+
+   ```bash
+   aws sns subscribe \
+     --region us-east-1 \
+     --topic-arn arn:aws:sns:us-east-1:ACCOUNT_ID:Alerts-appian-alerts-STAGE \
+     --protocol email \
+     --notification-endpoint you@example.com
+   ```
+
+2. Open the confirmation message AWS sends and confirm the subscription. Until that confirmation, the address does not receive alarms.
+
+Each person needs their own subscription on that topic.
 
 ## Contributing
 
