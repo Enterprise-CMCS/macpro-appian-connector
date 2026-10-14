@@ -57,6 +57,10 @@ export interface EnvironmentConfig {
   connectContainerMemory: number;
   // Instantclient container memory
   instantClientContainerMemory: number;
+  // EventBridge state of the minute testConnectors schedule
+  healthCheckSchedule: "ENABLED" | "DISABLED";
+  // Jira ticket label for this stage; null means no Jira notifier is deployed
+  jiraStageLabel: "VAL" | "PROD" | null;
 }
 
 /**
@@ -85,6 +89,8 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     connectContainerCpu: 512,
     connectContainerMemory: 1024,
     instantClientContainerMemory: 512,
+    healthCheckSchedule: "ENABLED",
+    jiraStageLabel: null,
   },
   val: {
     stage: "val",
@@ -93,6 +99,8 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     connectContainerCpu: 512,
     connectContainerMemory: 2560,
     instantClientContainerMemory: 512,
+    healthCheckSchedule: "DISABLED",
+    jiraStageLabel: "VAL",
   },
   production: {
     stage: "production",
@@ -101,6 +109,8 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     connectContainerCpu: 2048,
     connectContainerMemory: 4096,
     instantClientContainerMemory: 2048,
+    healthCheckSchedule: "DISABLED",
+    jiraStageLabel: "PROD",
   },
 };
 

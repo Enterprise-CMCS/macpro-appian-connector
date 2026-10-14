@@ -1,12 +1,14 @@
 import { queryString } from "./query";
+import connectorNames from "./connector-names.json";
 import type { ConnectorConfig } from "../../../types";
 
 export const connectors: ConnectorConfig[] = [
   {
-    name: "source.jdbc.appian-connector-dbo-1",
+    name: connectorNames.appianDbo,
     config: {
       "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
       "tasks.max": 1,
+      "connection.attempts": 1,
       "connection.user": process.env.legacydbUser || "",
       "connection.password": process.env.legacydbPassword || "",
       "connection.url": `jdbc:oracle:thin:@${process.env.legacydbIp}:${process.env.legacydbPort}:${process.env.legacyDb}`,

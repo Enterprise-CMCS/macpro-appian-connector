@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   putConnectors: vi.fn(),
   deleteConnectors: vi.fn(),
   sendMetricData: vi.fn(),
+  getMetricSum: vi.fn(),
 }));
 
 vi.mock("../../../libs/connect-lib", () => ({
@@ -18,6 +19,7 @@ vi.mock("../../../libs/connect-lib", () => ({
 
 vi.mock("../../../libs/cloudwatch-lib", () => ({
   sendMetricData: mocks.sendMetricData,
+  getMetricSum: mocks.getMetricSum,
 }));
 
 process.env.cluster = "cluster-1";
@@ -70,6 +72,7 @@ describe("testConnectors oracle health", () => {
     vi.spyOn(console, "log").mockImplementation(() => undefined);
     mocks.sendMetricData.mockResolvedValue(undefined);
     mocks.restartConnectors.mockResolvedValue(undefined);
+    mocks.getMetricSum.mockResolvedValue(0);
     mocks.testConnectors.mockReset();
   });
 

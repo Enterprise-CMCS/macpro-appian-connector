@@ -22,6 +22,8 @@ aws sns subscribe \
 
 Addresses are not committed. Each recipient is a separate subscription on that topic.
 
+In val and production, the connection alarms (`appian-connector-<stage>-conn-...`) and ECS task stops also open or update an OY2 Jira ticket through the connector stack's `jiraNotifier` Lambda. Email still comes from this topic.
+
 ## Testing
 
 You can manually test events sent to EventBridge with the [AWS CLI](https://aws.amazon.com/cli/)

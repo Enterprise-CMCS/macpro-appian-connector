@@ -81,6 +81,8 @@ export interface HttpRequestParams {
   method?: string;
   headers?: Record<string, string>;
   body?: unknown;
+  timeoutMs?: number;
+  retryDelayMs?: number;
 }
 
 // ============================================================================

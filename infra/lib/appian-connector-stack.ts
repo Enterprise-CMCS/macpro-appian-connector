@@ -11,7 +11,9 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as path from "node:path";
+import { addConnectorAlarms, loadConnectorNames } from "./connector-alarms";
 import { FullEnvironmentConfig } from "./environment-config";
+import { JiraNotifier } from "./jira-notifier";
 
 export interface AppianConnectorStackProps extends cdk.StackProps {
   /**
@@ -160,7 +162,7 @@ export class AppianConnectorStack extends cdk.Stack {
               },
               {
                 Effect: "Allow",
-                Action: ["cloudwatch:PutMetricData"],
+                Action: ["cloudwatch:PutMetricData", "cloudwatch:GetMetricStatistics"],
                 Resource: "*",
               },
             ],
@@ -171,43 +173,6 @@ export class AppianConnectorStack extends cdk.Stack {
       roleName: `appian-connector-${stage}-${this.region}-lambdaRole`,
       permissionsBoundary: iamPermissionsBoundary,
       managedPolicyArns: [`arn:${this.partition}:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole`],
-    });
-
-    const jdbcConnectorAlarm = new cloudwatch.CfnAlarm(this, "JdbcConnectorAlarm", {
-      alarmActions: [alertsTopicArn],
-      comparisonOperator: "GreaterThanOrEqualToThreshold",
-      datapointsToAlarm: 2,
-      evaluationPeriods: 5,
-      metricName: "source.jdbc.appian-dbo-1_failures",
-      namespace: servicePrefix,
-      period: 60,
-      statistic: "Sum",
-      threshold: 1,
-    });
-
-    const jdbcTaskAlarm = new cloudwatch.CfnAlarm(this, "JdbcTaskAlarm", {
-      alarmActions: [alertsTopicArn],
-      comparisonOperator: "GreaterThanOrEqualToThreshold",
-      datapointsToAlarm: 2,
-      evaluationPeriods: 5,
-      metricName: "source.jdbc.appian-dbo-1_task_failures",
-      namespace: servicePrefix,
-      period: 60,
-      statistic: "Sum",
-      threshold: 1,
-    });
-
-    const jdbcOracleAuthAlarm = new cloudwatch.CfnAlarm(this, "JdbcOracleAuthAlarm", {
-      alarmActions: [alertsTopicArn],
-      comparisonOperator: "GreaterThanOrEqualToThreshold",
-      datapointsToAlarm: 1,
-      evaluationPeriods: 1,
-      metricName: "source.jdbc.appian-connector-dbo-1_oracle_auth_failures",
-      namespace: servicePrefix,
-      period: 60,
-      statistic: "Sum",
-      threshold: 1,
-      treatMissingData: "notBreaching",
     });
 
     const kafkaConnectCluster = new ecs.CfnCluster(this, "KafkaConnectCluster", {
@@ -336,6 +301,21 @@ export class AppianConnectorStack extends cdk.Stack {
       ],
     });
 
+    const jiraNotifier = fullConfig.jiraStageLabel
+      ? new JiraNotifier(this, "JiraNotifier", {
+          stage,
+          servicePrefix,
+          stageLabel: fullConfig.jiraStageLabel,
+          alertsTopicArn,
+          handlersPath,
+          vpc,
+          securityGroupId: lambdaConfigureConnectorsSecurityGroup.ref,
+          logsKey: connectorLogsKey,
+          iamPath,
+          iamPermissionsBoundary,
+        })
+      : undefined;
+
     const ecsFailureEventRule = new events.CfnRule(this, "ECSFailureEventRule", {
       description: "Connector Task Failure Event Rule",
       eventPattern: {
@@ -363,8 +343,18 @@ export class AppianConnectorStack extends cdk.Stack {
               '"An Connector ECS Task Failure Event has occured for appian-connectors. Account: <account> Cluster ARN: <clusterArn> Status: <status> Reason: <stoppedReason>"\n',
           },
         },
+        ...(jiraNotifier ? [{ arn: jiraNotifier.function.functionArn, id: "JiraNotifierEcsTaskFailure" }] : []),
       ],
     });
+
+    if (jiraNotifier) {
+      new lambda.CfnPermission(this, "JiraNotifierPermissionEcsFailureEventRule", {
+        functionName: jiraNotifier.function.functionArn,
+        action: "lambda:InvokeFunction",
+        principal: "events.amazonaws.com",
+        sourceArn: ecsFailureEventRule.attrArn,
+      });
+    }
 
     const kafkaConnectWorkerSecurityGroupEgressLambda = new ec2.CfnSecurityGroupEgress(this, "KafkaConnectWorkerSecurityGroupEgressLambda", {
       groupId: kafkaConnectWorkerSecurityGroup.ref,
@@ -599,6 +589,7 @@ export class AppianConnectorStack extends cdk.Stack {
         cluster: kafkaConnectCluster.ref,
         service: kafkaConnectService.ref,
         namespace: servicePrefix,
+        maxRestartsPerHour: "3",
       },
       role: iam.Role.fromRoleArn(this, "TestConnectorsRole", iamRoleLambdaExecution.attrArn),
       vpc: ec2.Vpc.fromVpcAttributes(this, "TestConnectorsVpc", {
@@ -627,7 +618,7 @@ export class AppianConnectorStack extends cdk.Stack {
 
     const testConnectorsEventsRuleSchedule1 = new events.CfnRule(this, "TestConnectorsEventsRuleSchedule1", {
       scheduleExpression: "cron(0/1 * ? * * *)",
-      state: "ENABLED",
+      state: fullConfig.healthCheckSchedule,
       targets: [
         {
           arn: testConnectorsLambdaFunction.functionArn,
@@ -641,6 +632,14 @@ export class AppianConnectorStack extends cdk.Stack {
       action: "lambda:InvokeFunction",
       principal: "events.amazonaws.com",
       sourceArn: testConnectorsEventsRuleSchedule1.attrArn,
+    });
+
+    addConnectorAlarms(this, {
+      servicePrefix,
+      alertsTopicArn,
+      connectorNames: loadConnectorNames(),
+      healthCheckScheduleEnabled: fullConfig.healthCheckSchedule === "ENABLED",
+      testConnectorsFunctionName: `${servicePrefix}-testConnectors`,
     });
 
     // Outputs
