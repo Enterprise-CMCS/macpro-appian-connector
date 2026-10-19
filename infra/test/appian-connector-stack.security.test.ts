@@ -1,47 +1,5 @@
-import * as cdk from "aws-cdk-lib";
-import { Match, Template } from "aws-cdk-lib/assertions";
-import { AppianConnectorStack } from "../lib/appian-connector-stack";
-import { FullEnvironmentConfig } from "../lib/environment-config";
-
-const fullConfig: FullEnvironmentConfig = {
-  stage: "master",
-  taskCpu: "1024",
-  taskMemory: "2048",
-  connectContainerCpu: 512,
-  connectContainerMemory: 1024,
-  instantClientContainerMemory: 512,
-  vpc: {
-    id: "vpc-12345678",
-    dataSubnets: ["subnet-data-a", "subnet-data-b", "subnet-data-c"],
-    privateSubnets: ["subnet-private-a", "subnet-private-b", "subnet-private-c"],
-    publicSubnets: ["subnet-public-a", "subnet-public-b", "subnet-public-c"],
-  },
-  brokerString: "broker-1:9092,broker-2:9092",
-  dbInfo: {
-    ip: "127.0.0.1",
-    port: "5432",
-    db: "appian",
-    user: "connector",
-    password: "not-a-secret",
-    schema: "dbo",
-  },
-  iamPath: "/service-role/",
-  iamPermissionsBoundary: "arn:aws:iam::123456789012:policy/Boundary",
-  ecrImage: "123456789012.dkr.ecr.us-east-1.amazonaws.com/appian-connector:latest",
-};
-
-function synthesizeTemplate() {
-  const app = new cdk.App();
-  const stack = new AppianConnectorStack(app as cdk.App, "appian-connector-master", {
-    env: {
-      account: "123456789012",
-      region: "us-east-1",
-    },
-    fullConfig,
-  });
-
-  return Template.fromStack(stack);
-}
+import { Match } from "aws-cdk-lib/assertions";
+import { synthesizeTemplate } from "./fixtures";
 
 describe("AppianConnectorStack security controls", () => {
   it("allows CloudWatch Logs to use the connector log encryption key", () => {
@@ -82,6 +40,32 @@ describe("AppianConnectorStack security controls", () => {
         RetentionInDays: 30,
       });
     }
+  });
+
+  it("alarms on oracle auth failures through the existing alerts topic", () => {
+    const template = synthesizeTemplate();
+    const alarms = template.findResources("AWS::CloudWatch::Alarm");
+
+    template.hasResourceProperties("AWS::CloudWatch::Alarm", {
+      AlarmName: "appian-connector-master-conn-appian-connector-dbo-1-oracle-auth",
+      AlarmActions: ["arn:aws:sns:us-east-1:123456789012:Alerts-appian-alerts-master"],
+      OKActions: ["arn:aws:sns:us-east-1:123456789012:Alerts-appian-alerts-master"],
+      ComparisonOperator: "GreaterThanOrEqualToThreshold",
+      DatapointsToAlarm: 1,
+      EvaluationPeriods: 1,
+      MetricName: "source.jdbc.appian-connector-dbo-1_oracle_auth_failures",
+      Namespace: "appian-connector-master",
+      Period: 60,
+      Statistic: "Sum",
+      Threshold: 1,
+      TreatMissingData: "notBreaching",
+    });
+
+    const oracleErrorAlarms = Object.values(alarms).filter((alarm) => {
+      const metricName = alarm.Properties?.MetricName;
+      return typeof metricName === "string" && metricName.includes("oracle_errors");
+    });
+    expect(oracleErrorAlarms).toHaveLength(0);
   });
 
   it("uses the stack-managed Lambda execution role ARN for connector functions", () => {
