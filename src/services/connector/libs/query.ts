@@ -9,3 +9,9 @@ export const queryString = `SELECT CAST(PCKG_ID AS NUMERIC(8,0)) AS PCKG_ID, REP
                     RAI_FLAG, CLK_STUS, CNVRTD_FLAG, PEEK_FLAG, PRFL_ID, PRGRM_NAME, HLC_LVL_ID, ROUTG_INSTR, 
                     CLK_EXPRTN_FLAG, PRRTY_CD, SRC_DRAFT_PKG_ID, SUB_STUS FROM ${process.env.legacyschema}.MCP_SPA_PCKG`;
 
+// Confirmed visible columns from OY2-42370; freeze the full list once Database delivers the contract.
+// Do not SELECT * — the embedded Connect schema is the consumer contract.
+export const smartIntegrationQuery = `SELECT CAST(PCKG_ID AS NUMERIC(8,0)) AS PCKG_ID, SPA_ID, SPA_PCKG_ID, STATE_CD, PGM_CD,
+                    SBMSSN_DATE, PRGRM_NAME, CRNT_STUS, PKG_SUB_STUS, CRNT_STATE, RSPNS_TS, RQST_TS, CMPNNT_DESC
+                    FROM ${process.env.legacyschema}.MCP_SMART_INTEGRATION_VW`;
+

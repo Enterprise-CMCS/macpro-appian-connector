@@ -2,25 +2,53 @@ import * as http from "http";
 import * as ecs from "./ecs-lib";
 import type { ConnectorConfig, ConnectorStatus, HttpRequestParams } from "../types";
 
+const CONNECT_PORT = 8083;
+const REQUEST_TIMEOUT_MS = 10_000;
+const MAX_ATTEMPTS = 5;
+const RETRY_DELAY_MS = 5_000;
+
 const resolver = (req: http.ClientRequest, resolve: (value: number | undefined) => void): void => {
   console.log("Finished");
   req.socket?.destroy();
   resolve(req.socket?.destroyed ? 200 : undefined);
 };
 
-export async function connectRestApiWithRetry(params: HttpRequestParams): Promise<number | undefined> {
+function applyTimeout(req: http.ClientRequest, timeoutMs: number): void {
+  req.setTimeout(timeoutMs, () => {
+    req.destroy(new Error(`Request timed out after ${timeoutMs} ms`));
+  });
+}
+
+export async function connectRestApiWithRetry(params: HttpRequestParams, attempt = 1): Promise<number | undefined> {
   return new Promise((resolve, reject) => {
+    let settled = false;
+    const settleResolve = (value: number | undefined): void => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    const settleReject = (error: Error): void => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    };
+
     const retry = (e: string): void => {
       console.log("Got error: " + e);
-      setTimeout(async () => {
-        const result = await connectRestApiWithRetry(params);
-        resolve(result);
-      }, 5000);
+      if (settled) return;
+      if (attempt >= MAX_ATTEMPTS) {
+        settleReject(new Error(`Kafka Connect request failed after ${attempt} attempts: ${e}`));
+        return;
+      }
+      settled = true;
+      setTimeout(() => {
+        connectRestApiWithRetry(params, attempt + 1).then(resolve, reject);
+      }, params.retryDelayMs ?? RETRY_DELAY_MS);
     };
 
     const options: http.RequestOptions = {
       hostname: params.hostname,
-      port: params.port || 8083,
+      port: params.port || CONNECT_PORT,
       path: params.path || "",
       method: params.method || "GET",
       headers: params.headers || {
@@ -38,13 +66,14 @@ export async function connectRestApiWithRetry(params: HttpRequestParams): Promis
           retry(`${error}`);
         })
         .on("end", () => {
-          resolver(req, resolve);
+          resolver(req, settleResolve);
         });
     });
+    applyTimeout(req, params.timeoutMs ?? REQUEST_TIMEOUT_MS);
 
     req.on("error", (error) => {
       console.log("req.on error:", error);
-      reject(error);
+      settleReject(error);
     });
 
     if (params.body) {
@@ -174,11 +203,16 @@ export async function deleteConnectors(
   }
 }
 
-export async function testConnector(ip: string, config: ConnectorConfig): Promise<ConnectorStatus> {
+export async function testConnector(
+  ip: string,
+  config: ConnectorConfig,
+  port = CONNECT_PORT,
+  timeoutMs = REQUEST_TIMEOUT_MS
+): Promise<ConnectorStatus> {
   return new Promise((resolve, reject) => {
     const options: http.RequestOptions = {
       hostname: ip,
-      port: 8083,
+      port,
       path: `/connectors/${config.name}/status`,
       headers: {
         "Content-Type": "application/json",
@@ -200,22 +234,30 @@ export async function testConnector(ip: string, config: ConnectorConfig): Promis
           reject(error);
         })
         .on("end", () => {
-          console.log(responseData);
           try {
             const data = JSON.parse(responseData) as ConnectorStatus;
+            console.log(
+              "Kafka connector status",
+              JSON.stringify({
+                name: data.name,
+                connectorState: data.connector?.state,
+                tasks: (data.tasks ?? []).map((task) => ({ id: task.id, state: task.state })),
+              })
+            );
             resolve(data);
           } catch (e) {
-            reject(new Error(`Failed to parse response: ${responseData}`));
+            reject(new Error("Failed to parse connector status response"));
           }
         });
     });
+
+    applyTimeout(req, timeoutMs);
 
     req.on("error", (error) => {
       console.log("req.on error:", error);
       reject(error);
     });
 
-    req.write(JSON.stringify({}));
     req.end();
   });
 }

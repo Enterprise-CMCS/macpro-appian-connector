@@ -25,24 +25,35 @@ jobs:
     steps:
       - name: Validate stage name
         run: |
-          if [[ ! $STAGE_NAME =~ ^[a-z][a-z0-9-]*$ ]]; then
-              echo "ERROR: Your branch name, $STAGE_NAME, is not a valid stage name." && exit 1
+          if [[ -z ${STAGE_NAME:-} ]]; then
+            echo "ERROR: STAGE_NAME is not set."
+            exit 1
           fi
+          if [[ ! ${STAGE_NAME} =~ ^[a-z][a-z0-9-]*$ ]]; then
+            echo "ERROR: STAGE_NAME '${STAGE_NAME}' is not a valid stage name."
+            exit 1
+          fi
+
+  unit-tests:
+    needs:
+      - init
+    uses: ./.github/workflows/unit-tests.yml
 
   deploy:
     runs-on: ubuntu-latest
     needs:
       - init
+      - unit-tests
     environment:
       name: ${{ github.ref_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - uses: ./.github/actions/setup
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
           aws-region: us-east-1
@@ -57,5 +68,14 @@ jobs:
 
       - name: Deploy with CDK
         run: |
+          if [[ -z ${STAGE_NAME:-} ]]; then
+            echo "ERROR: STAGE_NAME is not set."
+            exit 1
+          fi
+          if [[ ! ${STAGE_NAME} =~ ^[a-z][a-z0-9-]*$ ]]; then
+            echo "ERROR: STAGE_NAME '${STAGE_NAME}' is not a valid stage name."
+            exit 1
+          fi
+          stage_name="${STAGE_NAME}"
           cd infra
-          npx cdk deploy appian-alerts-$STAGE_NAME appian-connector-$STAGE_NAME --require-approval never
+          npx cdk deploy "appian-alerts-${stage_name}" "appian-connector-${stage_name}" --require-approval never
