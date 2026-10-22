@@ -93,7 +93,7 @@ describe("connector alarms", () => {
 
   it("matches the live schedule state per stage", () => {
     expect(environmentConfigs.master.healthCheckSchedule).toBe("ENABLED");
-    expect(environmentConfigs.val.healthCheckSchedule).toBe("DISABLED");
+    expect(environmentConfigs.val.healthCheckSchedule).toBe("ENABLED");
     expect(environmentConfigs.production.healthCheckSchedule).toBe("DISABLED");
   });
 

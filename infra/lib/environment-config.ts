@@ -99,7 +99,7 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     connectContainerCpu: 512,
     connectContainerMemory: 2560,
     instantClientContainerMemory: 512,
-    healthCheckSchedule: "DISABLED",
+    healthCheckSchedule: "ENABLED",
     jiraStageLabel: "VAL",
   },
   production: {
