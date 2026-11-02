@@ -15,6 +15,22 @@ import { addConnectorAlarms, loadConnectorNames } from "./connector-alarms";
 import { FullEnvironmentConfig } from "./environment-config";
 import { JiraNotifier } from "./jira-notifier";
 
+/** x86_64 Falcon Container patch (CLDSPT-117172). Fargate tasks in this repo are amd64. */
+const FALCON_VOLUME_NAME = "crowdstrike-falcon-volume";
+const FALCON_INIT_CONTAINER_NAME = "crowdstrike-falcon-init-container";
+const FALCON_APP_ENTRY_POINT = [
+  "/tmp/CrowdStrike/rootfs/lib64/ld-linux-x86-64.so.2",
+  "--library-path",
+  "/tmp/CrowdStrike/rootfs/lib64",
+  "/tmp/CrowdStrike/rootfs/bin/bash",
+  "/tmp/CrowdStrike/rootfs/entrypoint-ecs.sh",
+];
+const FALCON_INIT_ENTRY_POINT = [
+  "/bin/bash",
+  "-c",
+  "chmod u+rwx /tmp/CrowdStrike && mkdir -p /tmp/CrowdStrike/rootfs/lib  && cp -r /bin /etc /lib64 /usr /entrypoint-ecs.sh /tmp/CrowdStrike/rootfs && chmod -R a=rX /tmp/CrowdStrike",
+];
+
 export interface AppianConnectorStackProps extends cdk.StackProps {
   /**
    * Full environment configuration including secrets from AWS Secrets Manager.
@@ -32,6 +48,7 @@ export interface AppianConnectorStackProps extends cdk.StackProps {
  * - Database credentials from appian/{stage}/dbInfo
  * - IAM paths from appian/{stage}/iam/*
  * - ECR image from ecr/images/appian/appian-connector
+ * - CrowdStrike Falcon image, CID, and provisioning token from crowdstrike/falcon
  *
  * Note: createTopics and cleanupKafka Lambda functions have been removed
  * as they are only needed for ephemeral environments. Topics for master,
@@ -50,7 +67,7 @@ export class AppianConnectorStack extends cdk.Stack {
 
     // Extract full environment config
     const { fullConfig } = props;
-    const { stage, vpc, brokerString, dbInfo, iamPath, iamPermissionsBoundary, ecrImage } = fullConfig;
+    const { stage, vpc, brokerString, dbInfo, iamPath, iamPermissionsBoundary, ecrImage, falcon } = fullConfig;
 
     // Service prefix for resource naming
     const servicePrefix = `appian-connector-${stage}`;
@@ -380,6 +397,7 @@ export class AppianConnectorStack extends cdk.Stack {
 
     // Kafka Connect topic naming follows the pattern: mgmt.connect.{service-prefix}.*
     const connectGroupId = `mgmt.connect.${servicePrefix}`;
+    const falconCtlOpts = `--provisioning-token=${falcon.provisioningToken} --tags=appian-connector,${stage},appian-connector-${stage}-connect --cid=${falcon.cid}`;
 
     const kafkaConnectWorkerTaskDefinition = new ecs.CfnTaskDefinition(this, "KafkaConnectWorkerTaskDefinition", {
       containerDefinitions: [
@@ -394,6 +412,25 @@ export class AppianConnectorStack extends cdk.Stack {
             "-c",
             "export ENI_IP=`curl $ECS_CONTAINER_METADATA_URI_V4 | sed -e 's/.*IPv4Addresses\":\\[\"\\(.*\\)\"\\],\"AttachmentIndex.*/\\1/'` &&\necho \"$ENI_IP localhost\" > /etc/hosts &&\necho \"export ENI_IP=$ENI_IP\" >> /home/appuser/.bashrc\nrunuser -p appuser -c '''\n  export HOME=/home/appuser &&\n  source /home/appuser/.bashrc\n  export CONNECT_REST_HOST_NAME=$ENI_IP &&\n  export CONNECT_REST_ADVERTISED_HOST_NAME=$ENI_IP &&\n  curl -L -O http://client.hub.confluent.io/confluent-hub-client-latest.tar.gz &&\n  tar -xzvf confluent-hub-client-latest.tar.gz &&\n  confluent-hub install confluentinc/kafka-connect-jdbc:10.5.1 --no-prompt &&\n  curl -L -o /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/ojdbc10.jar  https://download.oracle.com/otn-pub/otn_software/jdbc/1916/ojdbc10.jar &&\n  /etc/confluent/docker/run\n'''\n",
           ],
+          entryPoint: [...FALCON_APP_ENTRY_POINT],
+          dependsOn: [
+            {
+              containerName: FALCON_INIT_CONTAINER_NAME,
+              condition: "COMPLETE",
+            },
+          ],
+          mountPoints: [
+            {
+              containerPath: "/tmp/CrowdStrike",
+              readOnly: true,
+              sourceVolume: FALCON_VOLUME_NAME,
+            },
+          ],
+          linuxParameters: {
+            capabilities: {
+              add: ["SYS_PTRACE"],
+            },
+          },
           environment: [
             { name: "CONNECT_BOOTSTRAP_SERVERS", value: brokerString },
             { name: "CONNECT_GROUP_ID", value: connectGroupId },
@@ -412,6 +449,7 @@ export class AppianConnectorStack extends cdk.Stack {
             { name: "CONNECT_CONSUMER_BOOTSTRAP_SERVERS", value: brokerString },
             { name: "CONNECT_CONSUMER_SECURITY_PROTOCOL", value: "SSL" },
             { name: "CONNECT_PRODUCER_OFFSET_FLUSH_TIMEOUT_MS", value: "30000" },
+            { name: "FALCONCTL_OPTS", value: falconCtlOpts },
           ],
           logConfiguration: {
             logDriver: "awslogs",
@@ -428,8 +466,44 @@ export class AppianConnectorStack extends cdk.Stack {
           image: "ghcr.io/oracle/oraclelinux8-instantclient:21",
           memory: fullConfig.instantClientContainerMemory,
           command: ["bash", "-c", "sleep infinity\n"],
+          entryPoint: [...FALCON_APP_ENTRY_POINT],
+          dependsOn: [
+            {
+              containerName: FALCON_INIT_CONTAINER_NAME,
+              condition: "COMPLETE",
+            },
+          ],
+          mountPoints: [
+            {
+              containerPath: "/tmp/CrowdStrike",
+              readOnly: true,
+              sourceVolume: FALCON_VOLUME_NAME,
+            },
+          ],
+          linuxParameters: {
+            capabilities: {
+              add: ["SYS_PTRACE"],
+            },
+          },
+          environment: [{ name: "FALCONCTL_OPTS", value: falconCtlOpts }],
+        },
+        {
+          name: FALCON_INIT_CONTAINER_NAME,
+          image: falcon.image,
+          essential: false,
+          user: "0:0",
+          readonlyRootFilesystem: true,
+          entryPoint: [...FALCON_INIT_ENTRY_POINT],
+          mountPoints: [
+            {
+              containerPath: "/tmp/CrowdStrike",
+              readOnly: false,
+              sourceVolume: FALCON_VOLUME_NAME,
+            },
+          ],
         },
       ],
+      volumes: [{ name: FALCON_VOLUME_NAME }],
       family: `${servicePrefix}-kafka-connect-worker`,
       networkMode: "awsvpc",
       executionRoleArn: kafkaConnectWorkerRole.attrArn,
