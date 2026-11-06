@@ -9,9 +9,16 @@ export const queryString = `SELECT CAST(PCKG_ID AS NUMERIC(8,0)) AS PCKG_ID, REP
                     RAI_FLAG, CLK_STUS, CNVRTD_FLAG, PEEK_FLAG, PRFL_ID, PRGRM_NAME, HLC_LVL_ID, ROUTG_INSTR, 
                     CLK_EXPRTN_FLAG, PRRTY_CD, SRC_DRAFT_PKG_ID, SUB_STUS FROM ${process.env.legacyschema}.MCP_SPA_PCKG`;
 
-// Confirmed visible columns from OY2-42370; freeze the full list once Database delivers the contract.
+// Aggregated SMART view (OY2-41661). Column list verified against ALL_TAB_COLUMNS on Dev1
+// (21 columns, including SCND_FED_FY_AMNT, RSPNS_TS, RQST_TS).
+// Cast PCKG_ID like MCP_SPA_PCKG. Select CLOB columns natively: kafka-connect-jdbc maps
+// CLOB to a Connect string and reads the full value. Do not convert with DBMS_LOB.SUBSTR —
+// this DB has MAX_STRING_SIZE=STANDARD, so a VARCHAR2 result over 4000 chars errors
+// (ORA-06502) instead of delivering the data, and at 4000 it silently truncates
+// (actual maxima: RU_JSON ~14.6k chars, REVIEWER_JSON ~7.8k chars).
 // Do not SELECT * — the embedded Connect schema is the consumer contract.
-export const smartIntegrationQuery = `SELECT CAST(PCKG_ID AS NUMERIC(8,0)) AS PCKG_ID, SPA_ID, SPA_PCKG_ID, STATE_CD, PGM_CD,
-                    SBMSSN_DATE, PRGRM_NAME, CRNT_STUS, PKG_SUB_STUS, CRNT_STATE, RSPNS_TS, RQST_TS, CMPNNT_DESC
-                    FROM ${process.env.legacyschema}.MCP_SMART_INTEGRATION_VW`;
-
+export const smartIntegrationQuery = `SELECT CAST(PCKG_ID AS NUMERIC(8,0)) AS PCKG_ID, REPLICA_TIMESTAMP,
+                    SPA_ID, SPA_PCKG_ID, STATE_CD, PGM_CD, EXEC_SUMMARY, AUTHRTY_CD, SBMSSN_DATE,
+                    CRNT_STUS, PKG_SUB_STUS, CRNT_STATE, PRRTY_CD, FRST_FED_FY, FRST_FED_FY_AMNT, SCND_FED_FY,
+                    SCND_FED_FY_AMNT, RSPNS_TS, RQST_TS, RU_JSON, REVIEWER_JSON
+                    FROM ${process.env.legacyschema}.MCP_SMART_INTG_AGGRTN_VW`;
