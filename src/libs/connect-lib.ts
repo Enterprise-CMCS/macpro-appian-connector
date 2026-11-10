@@ -235,7 +235,18 @@ export async function testConnector(
         })
         .on("end", () => {
           try {
-            const data = JSON.parse(responseData) as ConnectorStatus;
+            const parsed = JSON.parse(responseData) as ConnectorStatus;
+            // A just-created or failed-to-start connector can return a 404 error body
+            // instead of a status. Normalize it so callers never read undefined fields.
+            const data: ConnectorStatus =
+              parsed && parsed.connector && Array.isArray(parsed.tasks)
+                ? parsed
+                : {
+                    name: config.name,
+                    connector: { state: "NOT_FOUND", worker_id: "" },
+                    tasks: [],
+                    type: "source",
+                  };
             console.log(
               "Kafka connector status",
               JSON.stringify({
