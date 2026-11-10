@@ -2,7 +2,8 @@ import { queryString, smartIntegrationQuery } from "./query";
 import connectorNames from "./connector-names.json";
 import type { ConnectorConfig } from "../../../types";
 
-export const SMART_INTEGRATION_INCREMENTING_COLUMN = "PCKG_ID";
+// The aggregated view no longer exposes a unique numeric package id, so the
+// JDBC source tracks changes with REPLICA_TIMESTAMP alone (mode=timestamp).
 export const SMART_INTEGRATION_TIMESTAMP_COLUMN = "REPLICA_TIMESTAMP";
 
 // Each connector's JDBC settings are written inline on purpose: duplicated
@@ -30,7 +31,7 @@ export const appianDboConnector: ConnectorConfig = {
   },
 };
 
-// MACPro → SMART (OY2-41661). No Kafka message key (same as MCP_SPA_PCKG).
+// MACPro → SMART (OY2-41661 / OY2-42881). No Kafka message key (same as MCP_SPA_PCKG).
 export const smartIntegrationConnector: ConnectorConfig = {
   name: connectorNames.appianSmart,
   config: {
@@ -42,8 +43,7 @@ export const smartIntegrationConnector: ConnectorConfig = {
     "connection.url": `jdbc:oracle:thin:@${process.env.legacydbIp}:${process.env.legacydbPort}:${process.env.legacyDb}`,
     "topic.prefix": `${process.env.topicNamespace}aws.appian.cmcs.MCP_SMART_INTG_AGGRTN_VW`,
     query: smartIntegrationQuery,
-    mode: "timestamp+incrementing",
-    "incrementing.column.name": SMART_INTEGRATION_INCREMENTING_COLUMN,
+    mode: "timestamp",
     "timestamp.column.name": SMART_INTEGRATION_TIMESTAMP_COLUMN,
     "poll.interval.ms": 300000,
     "batch.max.rows": 1000,

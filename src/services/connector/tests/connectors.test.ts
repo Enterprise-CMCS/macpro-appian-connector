@@ -3,7 +3,6 @@ import connectorNames from "../libs/connector-names.json";
 import {
   connectors,
   smartIntegrationConnector,
-  SMART_INTEGRATION_INCREMENTING_COLUMN,
   SMART_INTEGRATION_TIMESTAMP_COLUMN,
 } from "../libs/connectors";
 import { smartIntegrationQuery } from "../libs/query";
@@ -49,34 +48,39 @@ describe("smart integration connector", () => {
     expect(smartIntegrationConnector.config.query).toBe(smartIntegrationQuery);
   });
 
-  it("casts PCKG_ID and selects CLOB columns natively without truncation", () => {
-    expect(smartIntegrationQuery).toMatch(/CAST\(PCKG_ID AS NUMERIC\(8,0\)\) AS PCKG_ID/);
+  it("selects CLOB columns natively without truncation", () => {
     expect(smartIntegrationQuery).toMatch(/REPLICA_TIMESTAMP/);
     expect(smartIntegrationQuery).toMatch(/\bRU_JSON\b/);
     expect(smartIntegrationQuery).toMatch(/\bREVIEWER_JSON\b/);
     expect(smartIntegrationQuery).not.toMatch(/DBMS_LOB\.SUBSTR/);
     expect(smartIntegrationQuery).not.toMatch(/SELECT \*/);
+    expect(smartIntegrationQuery).not.toMatch(/\bPCKG_ID\b/);
+    expect(smartIntegrationQuery).not.toMatch(/\bSPA_PCKG_ID\b/);
+    expect(smartIntegrationQuery).not.toMatch(/\bAUTHRTY_CD\b/);
   });
 
   it("selects every column on the aggregated view", () => {
     for (const column of [
-      "SCND_FED_FY_AMNT",
-      "RSPNS_TS",
-      "RQST_TS",
       "SPA_ID",
-      "SPA_PCKG_ID",
       "STATE_CD",
       "PGM_CD",
       "EXEC_SUMMARY",
-      "AUTHRTY_CD",
+      "CNSLTN_DT",
       "SBMSSN_DATE",
-      "CRNT_STUS",
-      "PKG_SUB_STUS",
-      "CRNT_STATE",
       "PRRTY_CD",
       "FRST_FED_FY",
       "FRST_FED_FY_AMNT",
       "SCND_FED_FY",
+      "SCND_FED_FY_AMNT",
+      "CRNT_STUS",
+      "PKG_SUB_STUS",
+      "CRNT_STATE",
+      "RSPNS_TS",
+      "RQST_TS",
+      "SOURCE_SYSTEM",
+      "REPLICA_TIMESTAMP",
+      "RU_JSON",
+      "REVIEWER_JSON",
     ]) {
       expect(smartIntegrationQuery).toMatch(new RegExp(`\\b${column}\\b`));
     }
@@ -90,7 +94,7 @@ describe("smart integration connector", () => {
     expect(smartIntegrationConnector.config["connection.password"]).toBe(existing["connection.password"]);
     expect(smartIntegrationConnector.config["connection.url"]).toBe(existing["connection.url"]);
     expect(smartIntegrationConnector.config["poll.interval.ms"]).toBe(existing["poll.interval.ms"]);
-    expect(smartIntegrationConnector.config.mode).toBe("timestamp+incrementing");
+    expect(smartIntegrationConnector.config.mode).toBe("timestamp");
   });
 
   it("does not set a Kafka message key", () => {
@@ -99,14 +103,11 @@ describe("smart integration connector", () => {
     expect(smartIntegrationConnector.config["transforms.extractKey.field"]).toBeUndefined();
   });
 
-  it("tracks changes with REPLICA_TIMESTAMP and PCKG_ID", () => {
+  it("tracks changes with REPLICA_TIMESTAMP only", () => {
     expect(SMART_INTEGRATION_TIMESTAMP_COLUMN).toBe("REPLICA_TIMESTAMP");
-    expect(SMART_INTEGRATION_INCREMENTING_COLUMN).toBe("PCKG_ID");
     expect(smartIntegrationConnector.config["timestamp.column.name"]).toBe(
       SMART_INTEGRATION_TIMESTAMP_COLUMN
     );
-    expect(smartIntegrationConnector.config["incrementing.column.name"]).toBe(
-      SMART_INTEGRATION_INCREMENTING_COLUMN
-    );
+    expect(smartIntegrationConnector.config["incrementing.column.name"]).toBeUndefined();
   });
 });
