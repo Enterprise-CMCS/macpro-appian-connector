@@ -37,6 +37,19 @@ describe("connect-lib HTTP limits", () => {
     await expect(testConnector("127.0.0.1", { name: "c", config: {} }, port)).resolves.toMatchObject({ connector: { state: "RUNNING" } });
   });
 
+  it("testConnector normalizes a 404 error body to a NOT_FOUND status", async () => {
+    await startServer((_req, res) => {
+      res.writeHead(404, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error_code: 404, message: "Connector c not found" }));
+    });
+    await expect(testConnector("127.0.0.1", { name: "c", config: {} }, port)).resolves.toEqual({
+      name: "c",
+      connector: { state: "NOT_FOUND", worker_id: "" },
+      tasks: [],
+      type: "source",
+    });
+  });
+
   it("connectRestApiWithRetry rejects when the worker never responds", async () => {
     await startServer(() => undefined);
     await expect(connectRestApiWithRetry({ hostname: "127.0.0.1", port, timeoutMs: 50 })).rejects.toThrow("Request timed out after 50 ms");
