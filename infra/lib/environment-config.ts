@@ -17,6 +17,8 @@ export const SecretPaths = {
   iamPermissionsBoundary: (stage: string) => `appian/${stage}/iam/permissionsBoundary`,
   iamPermissionsBoundaryDefault: "appian/default/iam/permissionsBoundary",
   ecrImage: "ecr/images/appian/appian-connector",
+  // Shared across BigMAC accounts. Read only; this repo does not create or manage it.
+  falcon: "crowdstrike/falcon",
 } as const;
 
 /**
@@ -42,6 +44,16 @@ export interface DbConfig {
 }
 
 /**
+ * CrowdStrike Falcon Container sensor settings from Secrets Manager `crowdstrike/falcon`.
+ * Resolved at synth time. The secret itself is account-shared and not managed here.
+ */
+export interface FalconConfig {
+  cid: string;
+  provisioningToken: string;
+  image: string;
+}
+
+/**
  * Environment-specific configuration for ECS Fargate resources.
  * Values are based on currently deployed CloudFormation stacks.
  */
@@ -61,6 +73,9 @@ export interface EnvironmentConfig {
   healthCheckSchedule: "ENABLED" | "DISABLED";
   // Jira ticket label for this stage; null means no Jira notifier is deployed
   jiraStageLabel: "VAL" | "PROD" | null;
+  // Configure, health-check, and alarm on the SMART connector. Keep false until the stage's
+  // MCP_SMART_INTG_AGGRTN_VW view, SELECT grant, topic, and network path are confirmed.
+  smartConnectorEnabled: boolean;
 }
 
 /**
@@ -74,6 +89,7 @@ export interface FullEnvironmentConfig extends EnvironmentConfig {
   iamPath: string;
   iamPermissionsBoundary: string;
   ecrImage: string;
+  falcon: FalconConfig;
 }
 
 /**
@@ -91,6 +107,7 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     instantClientContainerMemory: 512,
     healthCheckSchedule: "ENABLED",
     jiraStageLabel: null,
+    smartConnectorEnabled: true,
   },
   val: {
     stage: "val",
@@ -101,6 +118,7 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     instantClientContainerMemory: 512,
     healthCheckSchedule: "ENABLED",
     jiraStageLabel: "VAL",
+    smartConnectorEnabled: false,
   },
   production: {
     stage: "production",
@@ -111,6 +129,7 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     instantClientContainerMemory: 2048,
     healthCheckSchedule: "DISABLED",
     jiraStageLabel: "PROD",
+    smartConnectorEnabled: false,
   },
 };
 
@@ -158,14 +177,16 @@ export async function loadEnvironmentSecrets(stage: string): Promise<{
   iamPath: string;
   iamPermissionsBoundary: string;
   ecrImage: string;
+  falcon: FalconConfig;
 }> {
-  const [vpcJson, brokerString, dbInfoJson, iamPath, iamPermissionsBoundary, ecrImage] = await Promise.all([
+  const [vpcJson, brokerString, dbInfoJson, iamPath, iamPermissionsBoundary, ecrImage, falconJson] = await Promise.all([
     getSecretWithFallback(SecretPaths.vpc(stage), SecretPaths.vpcDefault),
     getSecretWithFallback(SecretPaths.brokerString(stage), SecretPaths.brokerStringDefault),
     getSecretWithFallback(SecretPaths.dbInfo(stage), SecretPaths.dbInfoDefault),
     getSecretWithFallback(SecretPaths.iamPath(stage), SecretPaths.iamPathDefault),
     getSecretWithFallback(SecretPaths.iamPermissionsBoundary(stage), SecretPaths.iamPermissionsBoundaryDefault),
     getSecretValue(SecretPaths.ecrImage),
+    getSecretValue(SecretPaths.falcon),
   ]);
 
   return {
@@ -175,6 +196,19 @@ export async function loadEnvironmentSecrets(stage: string): Promise<{
     iamPath,
     iamPermissionsBoundary,
     ecrImage,
+    falcon: parseFalconSecret(falconJson),
+  };
+}
+
+function parseFalconSecret(secretJson: string): FalconConfig {
+  const parsed = JSON.parse(secretJson) as Partial<FalconConfig>;
+  if (!parsed.cid || !parsed.provisioningToken || !parsed.image) {
+    throw new Error("Secret crowdstrike/falcon must include non-empty cid, provisioningToken, and image");
+  }
+  return {
+    cid: parsed.cid,
+    provisioningToken: parsed.provisioningToken,
+    image: parsed.image,
   };
 }
 

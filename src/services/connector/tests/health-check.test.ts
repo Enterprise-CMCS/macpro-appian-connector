@@ -23,6 +23,8 @@ process.env.service = "service-1";
 process.env.namespace = "appian-connector-master";
 
 const connectorName = "source.jdbc.appian-connector-dbo-1";
+const smartConnectorName = "source.jdbc.appian-connector-smart-1";
+process.env.connectorNames = connectorName;
 
 function status(state: string, trace?: string): ConnectorStatus {
   return {
@@ -75,6 +77,41 @@ describe("testConnectors heartbeat", () => {
     expect(metricValue("health_check_heartbeat")).toBe(1);
     expect(metricValue(`${connectorName}_failures`)).toBe(1);
     expect(loggedText()).toContain("Could not find worker IP for ECS service");
+  });
+});
+
+describe("testConnectors stage connector list", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, "log").mockImplementation(() => undefined);
+    mocks.sendMetricData.mockResolvedValue(undefined);
+    mocks.getMetricSum.mockResolvedValue(0);
+  });
+
+  it("checks and reports only the connectors listed in connectorNames", async () => {
+    mocks.testConnectors.mockRejectedValue(new Error("worker unreachable"));
+    const { handler } = await import("../handlers/testConnectors");
+
+    await handler();
+
+    const checked = mocks.testConnectors.mock.calls[0][2] as Array<{ name: string }>;
+    expect(checked.map((connector) => connector.name)).toEqual([connectorName]);
+    expect(metricValue(`${smartConnectorName}_failures`)).toBeUndefined();
+  });
+
+  it("checks both connectors where the SMART connector is enabled", async () => {
+    process.env.connectorNames = `${connectorName},${smartConnectorName}`;
+    mocks.testConnectors.mockResolvedValue([]);
+    const { handler } = await import("../handlers/testConnectors");
+
+    try {
+      await handler();
+    } finally {
+      process.env.connectorNames = connectorName;
+    }
+
+    const checked = mocks.testConnectors.mock.calls[0][2] as Array<{ name: string }>;
+    expect(checked.map((connector) => connector.name)).toEqual([connectorName, smartConnectorName]);
   });
 });
 

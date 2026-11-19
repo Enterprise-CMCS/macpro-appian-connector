@@ -12,6 +12,7 @@ export const baseConfig: FullEnvironmentConfig = {
   instantClientContainerMemory: 512,
   healthCheckSchedule: "ENABLED",
   jiraStageLabel: null,
+  smartConnectorEnabled: true,
   vpc: {
     id: "vpc-12345678",
     dataSubnets: ["subnet-data-a", "subnet-data-b", "subnet-data-c"],
@@ -30,6 +31,11 @@ export const baseConfig: FullEnvironmentConfig = {
   iamPath: "/service-role/",
   iamPermissionsBoundary: "arn:aws:iam::123456789012:policy/Boundary",
   ecrImage: "123456789012.dkr.ecr.us-east-1.amazonaws.com/appian-connector:latest",
+  falcon: {
+    cid: "00000000000000000000000000000000-00",
+    provisioningToken: "not-a-token", // pragma: allowlist secret
+    image: "example.invalid/falcon-container:test",
+  },
 };
 
 export function synthesizeTemplate(overrides: Partial<FullEnvironmentConfig> = {}): Template {

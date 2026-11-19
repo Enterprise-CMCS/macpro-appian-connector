@@ -97,6 +97,35 @@ describe("connector alarms", () => {
     expect(environmentConfigs.production.healthCheckSchedule).toBe("DISABLED");
   });
 
+  it("enables the SMART connector on master only", () => {
+    expect(environmentConfigs.master.smartConnectorEnabled).toBe(true);
+    expect(environmentConfigs.val.smartConnectorEnabled).toBe(false);
+    expect(environmentConfigs.production.smartConnectorEnabled).toBe(false);
+  });
+
+  it("leaves SMART out of alarms and Lambda connector lists where it is disabled", () => {
+    const smart = "source.jdbc.appian-connector-smart-1";
+    const dbo = "source.jdbc.appian-connector-dbo-1";
+    const val = synthesizeTemplate({ stage: "val", smartConnectorEnabled: false });
+
+    const smartAlarms = val.findResources("AWS::CloudWatch::Alarm", {
+      Properties: { AlarmName: Match.stringLikeRegexp("appian-connector-smart-1") },
+    });
+    expect(Object.keys(smartAlarms)).toHaveLength(0);
+    val.hasResourceProperties("AWS::CloudWatch::Alarm", { AlarmName: "appian-connector-val-conn-appian-connector-dbo-1-connector-down" });
+
+    for (const fn of ["configureConnectors", "testConnectors"]) {
+      val.hasResourceProperties("AWS::Lambda::Function", {
+        FunctionName: `appian-connector-val-${fn}`,
+        Environment: { Variables: Match.objectLike({ connectorNames: dbo }) },
+      });
+      synthesizeTemplate().hasResourceProperties("AWS::Lambda::Function", {
+        FunctionName: `appian-connector-master-${fn}`,
+        Environment: { Variables: Match.objectLike({ connectorNames: `${dbo},${smart}` }) },
+      });
+    }
+  });
+
   it("lets testConnectors read restart counts with a cap of 3", () => {
     const template = synthesizeTemplate();
     template.hasResourceProperties("AWS::IAM::Role", {

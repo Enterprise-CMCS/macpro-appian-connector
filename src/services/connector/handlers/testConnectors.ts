@@ -1,7 +1,7 @@
 import * as connect from "../../../libs/connect-lib";
 import { getMetricSum, sendMetricData } from "../../../libs/cloudwatch-lib";
-import type { ConnectorStatus } from "../../../types";
-import { connectors } from "../libs/connectors";
+import type { ConnectorConfig, ConnectorStatus } from "../../../types";
+import { enabledConnectors } from "../libs/connectors";
 import { classifyOracleTaskTraces, formatOracleConnectorLog } from "../libs/oracle-trace";
 
 const RUNNING = "RUNNING";
@@ -39,6 +39,7 @@ async function restartIfNeeded(
   cluster: string,
   service: string,
   namespace: string,
+  connectors: ConnectorConfig[],
   result: ConnectorStatus,
   authFailure: boolean
 ): Promise<boolean> {
@@ -72,6 +73,7 @@ export const handler = async function (): Promise<void> {
   if (!cluster || !service || !namespace) {
     throw new Error("Environment variables 'cluster', 'service', and 'namespace' are required");
   }
+  const connectors = enabledConnectors(process.env.connectorNames);
 
   try {
     const results = await connect.testConnectors(cluster, service, connectors);
@@ -97,7 +99,9 @@ export const handler = async function (): Promise<void> {
       }
     }
 
-    await Promise.all(classifications.map(({ result }) => putMetric(namespace, `${result.name}_failures`, result.connector.state === RUNNING ? 0 : 1)));
+    await Promise.all(
+      classifications.map(({ result }) => putMetric(namespace, `${result.name}_failures`, result.connector.state === RUNNING ? 0 : 1))
+    );
 
     await Promise.all(
       classifications.map(({ result }) =>
@@ -118,7 +122,7 @@ export const handler = async function (): Promise<void> {
     );
 
     for (const { result, oracle } of classifications) {
-      const capped = await restartIfNeeded(cluster, service, namespace, result, oracle.authFailure);
+      const capped = await restartIfNeeded(cluster, service, namespace, connectors, result, oracle.authFailure);
       await putMetric(namespace, `${result.name}_restart_capped`, capped ? 1 : 0);
     }
   } catch (e) {

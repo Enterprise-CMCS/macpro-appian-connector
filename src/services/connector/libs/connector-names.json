@@ -1,3 +1,4 @@
 {
-  "appianDbo": "source.jdbc.appian-connector-dbo-1"
+  "appianDbo": "source.jdbc.appian-connector-dbo-1",
+  "appianSmart": "source.jdbc.appian-connector-smart-1"
 }
