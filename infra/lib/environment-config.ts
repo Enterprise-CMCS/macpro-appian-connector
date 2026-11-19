@@ -73,6 +73,9 @@ export interface EnvironmentConfig {
   healthCheckSchedule: "ENABLED" | "DISABLED";
   // Jira ticket label for this stage; null means no Jira notifier is deployed
   jiraStageLabel: "VAL" | "PROD" | null;
+  // Configure, health-check, and alarm on the SMART connector. Keep false until the stage's
+  // MCP_SMART_INTG_AGGRTN_VW view, SELECT grant, topic, and network path are confirmed.
+  smartConnectorEnabled: boolean;
 }
 
 /**
@@ -104,6 +107,7 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     instantClientContainerMemory: 512,
     healthCheckSchedule: "ENABLED",
     jiraStageLabel: null,
+    smartConnectorEnabled: true,
   },
   val: {
     stage: "val",
@@ -114,6 +118,7 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     instantClientContainerMemory: 512,
     healthCheckSchedule: "ENABLED",
     jiraStageLabel: "VAL",
+    smartConnectorEnabled: false,
   },
   production: {
     stage: "production",
@@ -124,6 +129,7 @@ export const environmentConfigs: Record<string, EnvironmentConfig> = {
     instantClientContainerMemory: 2048,
     healthCheckSchedule: "DISABLED",
     jiraStageLabel: "PROD",
+    smartConnectorEnabled: false,
   },
 };
 

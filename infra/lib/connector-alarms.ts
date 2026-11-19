@@ -5,8 +5,18 @@ import * as path from "node:path";
 
 const connectorNamesPath = path.join(__dirname, "../../src/services/connector/libs/connector-names.json");
 
+function loadConnectorNameMap(): Record<string, string> {
+  return JSON.parse(fs.readFileSync(connectorNamesPath, "utf-8")) as Record<string, string>;
+}
+
 export function loadConnectorNames(): string[] {
-  return Object.values(JSON.parse(fs.readFileSync(connectorNamesPath, "utf-8")) as Record<string, string>);
+  return Object.values(loadConnectorNameMap());
+}
+
+export function enabledConnectorNames(smartConnectorEnabled: boolean): string[] {
+  return Object.entries(loadConnectorNameMap())
+    .filter(([key]) => smartConnectorEnabled || key !== "appianSmart")
+    .map(([, name]) => name);
 }
 
 export function connectorShortName(connectorName: string): string {

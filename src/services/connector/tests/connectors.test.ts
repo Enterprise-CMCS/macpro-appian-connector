@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import connectorNames from "../libs/connector-names.json";
-import {
-  connectors,
-  smartIntegrationConnector,
-  SMART_INTEGRATION_TIMESTAMP_COLUMN,
-} from "../libs/connectors";
+import { connectors, enabledConnectors, smartIntegrationConnector, SMART_INTEGRATION_TIMESTAMP_COLUMN } from "../libs/connectors";
 import { smartIntegrationQuery } from "../libs/query";
 
 describe("connector names", () => {
@@ -23,6 +19,28 @@ describe("connector names", () => {
   });
 });
 
+describe("enabled connectors", () => {
+  it("returns the configs named in the list, in order", () => {
+    expect(enabledConnectors(`${connectorNames.appianDbo}, ${connectorNames.appianSmart}`).map((c) => c.name)).toEqual([
+      connectorNames.appianDbo,
+      connectorNames.appianSmart,
+    ]);
+  });
+
+  it("leaves out the SMART connector when it is not listed", () => {
+    expect(enabledConnectors(connectorNames.appianDbo).map((c) => c.name)).toEqual([connectorNames.appianDbo]);
+  });
+
+  it("requires a non-empty list", () => {
+    expect(() => enabledConnectors(undefined)).toThrow("'connectorNames' is required");
+    expect(() => enabledConnectors(" , ")).toThrow("'connectorNames' is required");
+  });
+
+  it("rejects an unknown connector name", () => {
+    expect(() => enabledConnectors("source.jdbc.unknown")).toThrow("Unknown connector name");
+  });
+});
+
 describe("smart integration connector", () => {
   it("is in the deployed connectors list and connector-names.json", () => {
     expect(connectors.map((connector) => connector.name)).toContain(smartIntegrationConnector.name);
@@ -35,12 +53,8 @@ describe("smart integration connector", () => {
   });
 
   it("uses the SMART aggregated view topic name", () => {
-    expect(String(smartIntegrationConnector.config["topic.prefix"])).toContain(
-      "aws.appian.cmcs.MCP_SMART_INTG_AGGRTN_VW"
-    );
-    expect(smartIntegrationConnector.config["topic.prefix"]).toBe(
-      `${process.env.topicNamespace}aws.appian.cmcs.MCP_SMART_INTG_AGGRTN_VW`
-    );
+    expect(String(smartIntegrationConnector.config["topic.prefix"])).toContain("aws.appian.cmcs.MCP_SMART_INTG_AGGRTN_VW");
+    expect(smartIntegrationConnector.config["topic.prefix"]).toBe(`${process.env.topicNamespace}aws.appian.cmcs.MCP_SMART_INTG_AGGRTN_VW`);
   });
 
   it("reads MCP_SMART_INTG_AGGRTN_VW from legacyschema", () => {
@@ -105,9 +119,7 @@ describe("smart integration connector", () => {
 
   it("tracks changes with REPLICA_TIMESTAMP only", () => {
     expect(SMART_INTEGRATION_TIMESTAMP_COLUMN).toBe("REPLICA_TIMESTAMP");
-    expect(smartIntegrationConnector.config["timestamp.column.name"]).toBe(
-      SMART_INTEGRATION_TIMESTAMP_COLUMN
-    );
+    expect(smartIntegrationConnector.config["timestamp.column.name"]).toBe(SMART_INTEGRATION_TIMESTAMP_COLUMN);
     expect(smartIntegrationConnector.config["incrementing.column.name"]).toBeUndefined();
   });
 });

@@ -12,6 +12,7 @@ export const baseConfig: FullEnvironmentConfig = {
   instantClientContainerMemory: 512,
   healthCheckSchedule: "ENABLED",
   jiraStageLabel: null,
+  smartConnectorEnabled: true,
   vpc: {
     id: "vpc-12345678",
     dataSubnets: ["subnet-data-a", "subnet-data-b", "subnet-data-c"],

@@ -55,3 +55,21 @@ export const smartIntegrationConnector: ConnectorConfig = {
 };
 
 export const connectors: ConnectorConfig[] = [appianDboConnector, smartIntegrationConnector];
+
+// The stack sets `connectorNames` per stage so a connector can be held back where its source is not ready.
+export function enabledConnectors(connectorNamesCsv: string | undefined): ConnectorConfig[] {
+  const names = (connectorNamesCsv ?? "")
+    .split(",")
+    .map((name) => name.trim())
+    .filter(Boolean);
+  if (names.length === 0) {
+    throw new Error("Environment variable 'connectorNames' is required");
+  }
+  return names.map((name) => {
+    const connector = connectors.find((item) => item.name === name);
+    if (!connector) {
+      throw new Error(`Unknown connector name in 'connectorNames': ${name}`);
+    }
+    return connector;
+  });
+}

@@ -11,7 +11,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as path from "node:path";
-import { addConnectorAlarms, loadConnectorNames } from "./connector-alarms";
+import { addConnectorAlarms, enabledConnectorNames } from "./connector-alarms";
 import { FullEnvironmentConfig } from "./environment-config";
 import { JiraNotifier } from "./jira-notifier";
 
@@ -71,6 +71,7 @@ export class AppianConnectorStack extends cdk.Stack {
 
     // Service prefix for resource naming
     const servicePrefix = `appian-connector-${stage}`;
+    const connectorNames = enabledConnectorNames(fullConfig.smartConnectorEnabled);
 
     // SNS Topic ARN for alerts (references the alerts stack in the same account)
     const alertsTopicArn = `arn:aws:sns:${this.region}:${this.account}:Alerts-appian-alerts-${stage}`;
@@ -592,6 +593,7 @@ export class AppianConnectorStack extends cdk.Stack {
         legacydbUser: dbInfo.user,
         legacydbPassword: dbInfo.password,
         legacyschema: dbInfo.schema,
+        connectorNames: connectorNames.join(","),
       },
       role: iam.Role.fromRoleArn(this, "ConfigureConnectorsRole", iamRoleLambdaExecution.attrArn),
       vpc: ec2.Vpc.fromVpcAttributes(this, "ConfigureConnectorsVpc", {
@@ -664,6 +666,7 @@ export class AppianConnectorStack extends cdk.Stack {
         service: kafkaConnectService.ref,
         namespace: servicePrefix,
         maxRestartsPerHour: "3",
+        connectorNames: connectorNames.join(","),
       },
       role: iam.Role.fromRoleArn(this, "TestConnectorsRole", iamRoleLambdaExecution.attrArn),
       vpc: ec2.Vpc.fromVpcAttributes(this, "TestConnectorsVpc", {
@@ -711,7 +714,7 @@ export class AppianConnectorStack extends cdk.Stack {
     addConnectorAlarms(this, {
       servicePrefix,
       alertsTopicArn,
-      connectorNames: loadConnectorNames(),
+      connectorNames,
       healthCheckScheduleEnabled: fullConfig.healthCheckSchedule === "ENABLED",
       testConnectorsFunctionName: `${servicePrefix}-testConnectors`,
     });

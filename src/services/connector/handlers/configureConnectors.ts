@@ -1,5 +1,5 @@
 import * as connect from "../../../libs/connect-lib";
-import { connectors } from "../libs/connectors";
+import { enabledConnectors } from "../libs/connectors";
 import { classifyOracleTaskTraces, formatOracleConnectorLog } from "../libs/oracle-trace";
 
 export const handler = async function (): Promise<void> {
@@ -9,6 +9,7 @@ export const handler = async function (): Promise<void> {
   if (!cluster || !service) {
     throw new Error("Environment variables 'cluster' and 'service' are required");
   }
+  const connectors = enabledConnectors(process.env.connectorNames);
 
   await connect.putConnectors(cluster, service, connectors);
   await connect.deleteConnectors(cluster, service, []);
