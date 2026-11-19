@@ -19,15 +19,16 @@ The infrastructure consists of two CloudFormation stacks:
 - **Lambda Functions**:
   - `configureConnectors`: Configures Kafka connectors
   - `testConnectors`: Monitors connector health and sends metrics
+  - `jiraNotifier` (val and production): Opens or comments on OY2 Jira tickets for `-conn-` alarms and ECS task stops; failed events go to an SQS dead-letter queue
   - `createTopics`: (Legacy) Creates Kafka topics
   - `cleanupKafka`: (Legacy) Cleans up Kafka topics
 - **Security Groups**: Network isolation for Lambda and ECS
-- **CloudWatch Alarms**: Monitoring for errors, warnings, CPU, and memory
+- **CloudWatch Alarms**: Named `-conn-` connection alarms per connector (built in `lib/connector-alarms.ts`), health check heartbeat and Lambda error alarms, and log error, warning, CPU, and memory alarms
 - **EventBridge Rules**: Scheduled execution and failure notifications
 
 ## Prerequisites
 
-- Node.js 20.x
+- Node.js 24.x
 - Yarn
 - AWS CLI configured with appropriate credentials
 - CDK Bootstrap stack with qualifier `one` (already deployed in target accounts)

@@ -69,6 +69,7 @@ export interface ConnectorStatus {
     id: number;
     state: string;
     worker_id: string;
+    trace?: string | null;
   }>;
   type: string;
 }
@@ -80,6 +81,8 @@ export interface HttpRequestParams {
   method?: string;
   headers?: Record<string, string>;
   body?: unknown;
+  timeoutMs?: number;
+  retryDelayMs?: number;
 }
 
 // ============================================================================
